@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CNTextView : UITextView
+@interface CNTextView : UITextView <UITextViewDelegate,NSTextStorageDelegate>
 
 @property UITapGestureRecognizer * tap;
 

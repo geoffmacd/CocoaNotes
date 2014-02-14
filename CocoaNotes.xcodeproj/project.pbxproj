@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		24E90F9A18ADB29F00DF9FB4 /* CNTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9918ADB29F00DF9FB4 /* CNTextView.m */; };
+		24E90F9D18ADBAA700DF9FB4 /* Note.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9C18ADBAA700DF9FB4 /* Note.m */; };
+		24E90FA018ADBAA800DF9FB4 /* Tag.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9F18ADBAA800DF9FB4 /* Tag.m */; };
 		C3EEDB2818AD5E30003CC23D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EEDB2718AD5E30003CC23D /* Foundation.framework */; };
 		C3EEDB2A18AD5E30003CC23D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EEDB2918AD5E30003CC23D /* CoreGraphics.framework */; };
 		C3EEDB2C18AD5E30003CC23D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EEDB2B18AD5E30003CC23D /* UIKit.framework */; };
@@ -44,6 +46,10 @@
 /* Begin PBXFileReference section */
 		24E90F9818ADB29F00DF9FB4 /* CNTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNTextView.h; sourceTree = "<group>"; };
 		24E90F9918ADB29F00DF9FB4 /* CNTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNTextView.m; sourceTree = "<group>"; };
+		24E90F9B18ADBAA700DF9FB4 /* Note.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Note.h; sourceTree = "<group>"; };
+		24E90F9C18ADBAA700DF9FB4 /* Note.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Note.m; sourceTree = "<group>"; };
+		24E90F9E18ADBAA800DF9FB4 /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
+		24E90F9F18ADBAA800DF9FB4 /* Tag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Tag.m; sourceTree = "<group>"; };
 		C3EEDB2418AD5E30003CC23D /* CocoaNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CocoaNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3EEDB2718AD5E30003CC23D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C3EEDB2918AD5E30003CC23D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -98,6 +104,40 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		24E90FA118ADBAC500DF9FB4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C3EEDB4118AD5E30003CC23D /* CocoaNotes.xcdatamodeld */,
+				24E90F9E18ADBAA800DF9FB4 /* Tag.h */,
+				24E90F9F18ADBAA800DF9FB4 /* Tag.m */,
+				24E90F9B18ADBAA700DF9FB4 /* Note.h */,
+				24E90F9C18ADBAA700DF9FB4 /* Note.m */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		24E90FA218ADBACC00DF9FB4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				24E90F9818ADB29F00DF9FB4 /* CNTextView.h */,
+				24E90F9918ADB29F00DF9FB4 /* CNTextView.m */,
+				C3EEDB3B18AD5E30003CC23D /* Main_iPhone.storyboard */,
+				C3EEDB3E18AD5E30003CC23D /* Main_iPad.storyboard */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		24E90FA318ADBAD800DF9FB4 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				C3EEDB4418AD5E30003CC23D /* CNMasterViewController.h */,
+				C3EEDB4518AD5E30003CC23D /* CNMasterViewController.m */,
+				C3EEDB4718AD5E30003CC23D /* CNDetailViewController.h */,
+				C3EEDB4818AD5E30003CC23D /* CNDetailViewController.m */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
 		C3EEDB1B18AD5E2F003CC23D = {
 			isa = PBXGroup;
 			children = (
@@ -134,19 +174,13 @@
 		C3EEDB2F18AD5E30003CC23D /* CocoaNotes */ = {
 			isa = PBXGroup;
 			children = (
+				24E90FA118ADBAC500DF9FB4 /* Models */,
 				C3EEDB3818AD5E30003CC23D /* CNAppDelegate.h */,
 				C3EEDB3918AD5E30003CC23D /* CNAppDelegate.m */,
-				C3EEDB3B18AD5E30003CC23D /* Main_iPhone.storyboard */,
-				C3EEDB3E18AD5E30003CC23D /* Main_iPad.storyboard */,
-				C3EEDB4418AD5E30003CC23D /* CNMasterViewController.h */,
-				C3EEDB4518AD5E30003CC23D /* CNMasterViewController.m */,
-				C3EEDB4718AD5E30003CC23D /* CNDetailViewController.h */,
-				C3EEDB4818AD5E30003CC23D /* CNDetailViewController.m */,
+				24E90FA218ADBACC00DF9FB4 /* Views */,
+				24E90FA318ADBAD800DF9FB4 /* Controllers */,
 				C3EEDB4A18AD5E30003CC23D /* Images.xcassets */,
-				C3EEDB4118AD5E30003CC23D /* CocoaNotes.xcdatamodeld */,
 				C3EEDB3018AD5E30003CC23D /* Supporting Files */,
-				24E90F9818ADB29F00DF9FB4 /* CNTextView.h */,
-				24E90F9918ADB29F00DF9FB4 /* CNTextView.m */,
 			);
 			path = CocoaNotes;
 			sourceTree = "<group>";
@@ -285,7 +319,9 @@
 				C3EEDB3618AD5E30003CC23D /* main.m in Sources */,
 				24E90F9A18ADB29F00DF9FB4 /* CNTextView.m in Sources */,
 				C3EEDB4318AD5E30003CC23D /* CocoaNotes.xcdatamodeld in Sources */,
+				24E90FA018ADBAA800DF9FB4 /* Tag.m in Sources */,
 				C3EEDB3A18AD5E30003CC23D /* CNAppDelegate.m in Sources */,
+				24E90F9D18ADBAA700DF9FB4 /* Note.m in Sources */,
 				C3EEDB4618AD5E30003CC23D /* CNMasterViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

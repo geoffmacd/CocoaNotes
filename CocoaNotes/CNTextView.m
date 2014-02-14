@@ -30,12 +30,19 @@
 
 -(void)config{
     
-    _tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)];
-    [self addGestureRecognizer:_tap];
+//    _tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)];
+//    [self addGestureRecognizer:_tap];
     
     for(UIGestureRecognizer  *recog  in [self gestureRecognizers]){
         NSLog(@"%@", [recog description]);
     }
+    
+    
+    [self setDelegate:self];
+    
+    NSTextStorage * storage = self.textStorage;
+    [storage setDelegate:self];
+    
 }
 
 -(void)tapped:(NSNotification*)notification{
@@ -70,6 +77,25 @@
         y += lineHeight;
     }
     
+    
+}
+
+
+#pragma UITextViewDelegate
+
+-(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
+    
+    NSLog(@"%@",text);
+    return YES;
+}
+
+#pragma NSTextStorageDelegate
+
+-(void)textStorage:(NSTextStorage *)textStorage willProcessEditing:(NSTextStorageEditActions)editedMask range:(NSRange)editedRange changeInLength:(NSInteger)delta{
+
+}
+
+-(void)textStorage:(NSTextStorage *)textStorage didProcessEditing:(NSTextStorageEditActions)editedMask range:(NSRange)editedRange changeInLength:(NSInteger)delta{
     
 }
 

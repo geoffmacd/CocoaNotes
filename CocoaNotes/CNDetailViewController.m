@@ -44,7 +44,6 @@
 - (void)configureView
 {
     // Update the user interface for the detail item.
-    
 
     if (self.detailItem) {
         self.textView.text = [[self.detailItem valueForKey:@"text"] description];

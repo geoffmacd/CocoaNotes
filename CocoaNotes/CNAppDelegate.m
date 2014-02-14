@@ -29,6 +29,7 @@
         controller.managedObjectContext = self.managedObjectContext;
     } else {
         UINavigationController *navigationController = (UINavigationController *)self.window.rootViewController;
+        [navigationController.view setTintColor:[UIColor purpleColor]];
         CNMasterViewController *controller = (CNMasterViewController *)navigationController.topViewController;
         controller.managedObjectContext = self.managedObjectContext;
     }
