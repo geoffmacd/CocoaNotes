@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		24E90F9A18ADB29F00DF9FB4 /* CNTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9918ADB29F00DF9FB4 /* CNTextView.m */; };
 		C3EEDB2818AD5E30003CC23D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EEDB2718AD5E30003CC23D /* Foundation.framework */; };
 		C3EEDB2A18AD5E30003CC23D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EEDB2918AD5E30003CC23D /* CoreGraphics.framework */; };
 		C3EEDB2C18AD5E30003CC23D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EEDB2B18AD5E30003CC23D /* UIKit.framework */; };
@@ -41,6 +42,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		24E90F9818ADB29F00DF9FB4 /* CNTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNTextView.h; sourceTree = "<group>"; };
+		24E90F9918ADB29F00DF9FB4 /* CNTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNTextView.m; sourceTree = "<group>"; };
 		C3EEDB2418AD5E30003CC23D /* CocoaNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CocoaNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3EEDB2718AD5E30003CC23D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C3EEDB2918AD5E30003CC23D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -142,6 +145,8 @@
 				C3EEDB4A18AD5E30003CC23D /* Images.xcassets */,
 				C3EEDB4118AD5E30003CC23D /* CocoaNotes.xcdatamodeld */,
 				C3EEDB3018AD5E30003CC23D /* Supporting Files */,
+				24E90F9818ADB29F00DF9FB4 /* CNTextView.h */,
+				24E90F9918ADB29F00DF9FB4 /* CNTextView.m */,
 			);
 			path = CocoaNotes;
 			sourceTree = "<group>";
@@ -278,6 +283,7 @@
 			files = (
 				C3EEDB4918AD5E30003CC23D /* CNDetailViewController.m in Sources */,
 				C3EEDB3618AD5E30003CC23D /* main.m in Sources */,
+				24E90F9A18ADB29F00DF9FB4 /* CNTextView.m in Sources */,
 				C3EEDB4318AD5E30003CC23D /* CocoaNotes.xcdatamodeld in Sources */,
 				C3EEDB3A18AD5E30003CC23D /* CNAppDelegate.m in Sources */,
 				C3EEDB4618AD5E30003CC23D /* CNMasterViewController.m in Sources */,

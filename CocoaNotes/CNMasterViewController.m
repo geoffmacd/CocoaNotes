@@ -51,6 +51,7 @@
     // If appropriate, configure the new managed object.
     // Normally you should use accessor methods, but using KVC here avoids the need to add a custom class to the template.
     [newManagedObject setValue:[NSDate date] forKey:@"timeStamp"];
+    [newManagedObject setValue:@"geodsfds fsfs dfds fsf dsfdsf" forKey:@"text"];
     
     // Save the context.
     NSError *error = nil;
@@ -124,6 +125,7 @@
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
         NSManagedObject *object = [[self fetchedResultsController] objectAtIndexPath:indexPath];
         [[segue destinationViewController] setDetailItem:object];
+        [[segue destinationViewController] setContext:self.managedObjectContext];
     }
 }
 
@@ -137,7 +139,7 @@
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     // Edit the entity name as appropriate.
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Event" inManagedObjectContext:self.managedObjectContext];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Note" inManagedObjectContext:self.managedObjectContext];
     [fetchRequest setEntity:entity];
     
     // Set the batch size to a suitable number.

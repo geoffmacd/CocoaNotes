@@ -31,12 +31,23 @@
     }        
 }
 
+-(void)detailViewComponents:(UIView*)view{
+    
+    NSLog(@"%@", [view description]);
+    
+    for(UIView * subView in [view subviews]){
+        
+        [self detailViewComponents:subView];
+    }
+}
+
 - (void)configureView
 {
     // Update the user interface for the detail item.
+    
 
     if (self.detailItem) {
-        self.detailDescriptionLabel.text = [[self.detailItem valueForKey:@"timeStamp"] description];
+        self.textView.text = [[self.detailItem valueForKey:@"text"] description];
     }
 }
 
@@ -45,6 +56,12 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     [self configureView];
+}
+
+-(void)viewWillDisappear:(BOOL)animated{
+    
+    [self.detailItem setValue:[self.textView text] forKey:@"text"];
+    [self.context save:nil];
 }
 
 - (void)didReceiveMemoryWarning

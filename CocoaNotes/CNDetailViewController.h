@@ -7,10 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CNTextView.h"
 
 @interface CNDetailViewController : UIViewController <UISplitViewControllerDelegate>
 
 @property (strong, nonatomic) id detailItem;
 
-@property (weak, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
+@property (weak, nonatomic) IBOutlet CNTextView *textView;
+@property NSManagedObjectContext * context;
 @end
