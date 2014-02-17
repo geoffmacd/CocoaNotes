@@ -10,7 +10,7 @@
 		24D2DCC418B077DB000E73DD /* CNProgrammaticSpellCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 24D2DCC318B077DB000E73DD /* CNProgrammaticSpellCheck.m */; };
 		24D2DCC718B07AA7000E73DD /* CocoaCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 24D2DCC618B07AA7000E73DD /* CocoaCheck.m */; };
 		24D2DCCA18B07AB4000E73DD /* FoundationCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 24D2DCC918B07AB4000E73DD /* FoundationCheck.m */; };
-		24D2DCCD18B1CC9A000E73DD /* CNSuggestionViewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 24D2DCCC18B1CC9A000E73DD /* CNSuggestionViewViewController.m */; };
+		24D2DCCD18B1CC9A000E73DD /* CNSuggestionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 24D2DCCC18B1CC9A000E73DD /* CNSuggestionViewController.m */; };
 		24E90F9A18ADB29F00DF9FB4 /* CNTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9918ADB29F00DF9FB4 /* CNTextView.m */; };
 		24E90F9D18ADBAA700DF9FB4 /* Note.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9C18ADBAA700DF9FB4 /* Note.m */; };
 		24E90FA018ADBAA800DF9FB4 /* Tag.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9F18ADBAA800DF9FB4 /* Tag.m */; };
@@ -54,8 +54,8 @@
 		24D2DCC618B07AA7000E73DD /* CocoaCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CocoaCheck.m; sourceTree = "<group>"; };
 		24D2DCC818B07AB4000E73DD /* FoundationCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FoundationCheck.h; sourceTree = "<group>"; };
 		24D2DCC918B07AB4000E73DD /* FoundationCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FoundationCheck.m; sourceTree = "<group>"; };
-		24D2DCCB18B1CC9A000E73DD /* CNSuggestionViewViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNSuggestionViewViewController.h; sourceTree = "<group>"; };
-		24D2DCCC18B1CC9A000E73DD /* CNSuggestionViewViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNSuggestionViewViewController.m; sourceTree = "<group>"; };
+		24D2DCCB18B1CC9A000E73DD /* CNSuggestionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNSuggestionViewController.h; sourceTree = "<group>"; };
+		24D2DCCC18B1CC9A000E73DD /* CNSuggestionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNSuggestionViewController.m; sourceTree = "<group>"; };
 		24E90F9818ADB29F00DF9FB4 /* CNTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNTextView.h; sourceTree = "<group>"; };
 		24E90F9918ADB29F00DF9FB4 /* CNTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNTextView.m; sourceTree = "<group>"; };
 		24E90F9B18ADBAA700DF9FB4 /* Note.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Note.h; sourceTree = "<group>"; };
@@ -139,8 +139,8 @@
 				24E90F9918ADB29F00DF9FB4 /* CNTextView.m */,
 				C3EEDB3B18AD5E30003CC23D /* Main_iPhone.storyboard */,
 				C3EEDB3E18AD5E30003CC23D /* Main_iPad.storyboard */,
-				24D2DCCB18B1CC9A000E73DD /* CNSuggestionViewViewController.h */,
-				24D2DCCC18B1CC9A000E73DD /* CNSuggestionViewViewController.m */,
+				24D2DCCB18B1CC9A000E73DD /* CNSuggestionViewController.h */,
+				24D2DCCC18B1CC9A000E73DD /* CNSuggestionViewController.m */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -335,7 +335,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				24D2DCCD18B1CC9A000E73DD /* CNSuggestionViewViewController.m in Sources */,
+				24D2DCCD18B1CC9A000E73DD /* CNSuggestionViewController.m in Sources */,
 				C3EEDB4918AD5E30003CC23D /* CNDetailViewController.m in Sources */,
 				C3EEDB3618AD5E30003CC23D /* main.m in Sources */,
 				24E90F9A18ADB29F00DF9FB4 /* CNTextView.m in Sources */,

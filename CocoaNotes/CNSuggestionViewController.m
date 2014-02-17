@@ -6,19 +6,22 @@
 //  Copyright (c) 2014 GeoffMacDonald. All rights reserved.
 //
 
-#import "CNSuggestionViewViewController.h"
+#import "CNSuggestionViewController.h"
 
-@interface CNSuggestionViewViewController ()
+@interface CNSuggestionViewController ()
 
 @end
 
-@implementation CNSuggestionViewViewController
+@implementation CNSuggestionViewController
+
+static NSString *CellIdentifier = @"Cell";
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
     if (self) {
         // Custom initialization
+        [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CellIdentifier];
     }
     return self;
 }
@@ -39,25 +42,34 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     //list methods, classes, etc seperately
-    return 0;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 0;
+    return [_list count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"Cell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
-    // Configure the cell...
+    [cell.textLabel setText:_list[[indexPath row]]];
     
     return cell;
 }
 
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    NSString * word = _list[[indexPath row]];
+    [self.delegate didSelectWord:word];
+}
 
-
+-(void)setList:(NSArray *)list{
+    
+    _list = list;
+    
+    [self.tableView reloadData];
+}
 
 @end

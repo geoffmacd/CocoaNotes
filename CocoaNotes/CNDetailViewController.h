@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "CNTextView.h"
 
-@interface CNDetailViewController : UIViewController <UISplitViewControllerDelegate>
+@interface CNDetailViewController : UIViewController <UISplitViewControllerDelegate,CNTextViewDelegate>
 
 @property (strong, nonatomic) id detailItem;
 

@@ -51,7 +51,7 @@
     // If appropriate, configure the new managed object.
     // Normally you should use accessor methods, but using KVC here avoids the need to add a custom class to the template.
     [newManagedObject setValue:[NSDate date] forKey:@"timeStamp"];
-    [newManagedObject setValue:@"geodsfds fsfs dfds fsf dsfdsf" forKey:@"text"];
+    [newManagedObject setValue:@"Text here" forKey:@"text"];
     
     // Save the context.
     NSError *error = nil;

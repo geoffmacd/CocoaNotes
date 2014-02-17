@@ -8,7 +8,6 @@
 
 #import "CNTextView.h"
 #import "CocoaCheck.h"
-#import "CNSuggestionViewViewController.h"
 
 @implementation CNTextView
 
@@ -68,13 +67,28 @@
     }
 }
 
--(void)showListView:(NSString*)word{
+-(void)showListView:(NSSet*)suggestions withFirstIndex:(NSInteger)first{
     
     
-    CNSuggestionViewViewController * suggestor = [[CNSuggestionViewViewController alloc] initWithStyle:UITableViewStyleGrouped];
+    CNSuggestionViewController * suggestor = [[CNSuggestionViewController alloc] initWithStyle:UITableViewStyleGrouped];
     
+    [suggestor.view setFrame:CGRectMake(0, 200, self.bounds.size.width, 100)];
+    [suggestor setList: [suggestions allObjects]];
+    [suggestor setDelegate:self];
     
-    [self.parentControl willShowSuggestionBox:suggestor];
+    if([self.parentControl willShowSuggestionBox:suggestor]){
+        _suggestionBox = suggestor;
+        firstIndex = first;
+        showingBox = YES;
+    }
+}
+
+-(void)removeListView{
+    
+    [self.parentControl willRemoveSuggestionBox:_suggestionBox];
+    showingBox = NO;
+    firstIndex = -1;
+    _suggestionBox = nil;
 }
 
 -(BOOL)shouldDisableAutoComplete:(NSString*)word{
@@ -93,8 +107,23 @@
     return should;
 }
 
--(void)checkAutoComplete:(NSString*)word{
+-(void)showAutoComplete:(NSString*)word withStartIndex:(NSInteger)index{
     
+    __block NSMutableSet * list = [NSMutableSet new];
+    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        CNProgrammaticSpellCheck * checker = obj;
+        NSSet * added =[checker listClasses:word];
+        if([added count]){
+            NSLog(@"found suggestions");
+            [list unionSet:added];
+        }
+    }];
+    
+    //decide to display suggestion box
+    if([list count]){
+        [self showListView:[NSSet setWithSet:list] withFirstIndex:index];
+    }
 }
 
 -(void)disableAutoComplete{
@@ -109,45 +138,104 @@
     
 }
 
+-(void)continueSuggestions:(NSString*)allText withReplace:(NSString*)replacement{
+    
+    //determine whether suggestion box should still be displayed
+    
+    NSString * constructed = [NSString stringWithFormat:@"%@%@", allText, replacement];
+    if([constructed length] > firstIndex + 1){
+        constructed = [constructed substringFromIndex:firstIndex];
+        __block NSMutableSet * list = [NSMutableSet new];
+        [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            
+            CNProgrammaticSpellCheck * checker = obj;
+            NSSet * added =[checker listClasses:constructed];
+            if([added count]){
+                NSLog(@"found suggestions");
+                [list unionSet:added];
+            }
+        }];
+        
+        if([list count]){
+            //update words
+            [self.suggestionBox setList:[list allObjects]];
+        } else {
+            //remove suggestion box
+            [self removeListView];
+        }
+    } else{
+        //before first two letters
+        [self removeListView];
+    }
+}
 
 #pragma UITextViewDelegate
 
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
+
     
-    NSLog(@"replacement: %@",text);
+    //determine if last two letters denote a possible class
+    NSLog(@"replacement text: %@",text);
     
     NSString * allText = [textView text];
-    
     if(![allText length])
         return YES;
     
-    unichar lastLetter;
-    unichar thisLetter;
-    if([text length]){
-        lastLetter = [allText characterAtIndex:[allText length]-1];
-        thisLetter = [text characterAtIndex:0];
-    } else {
-        lastLetter = [allText characterAtIndex:[allText length]-2];
-        thisLetter = [allText characterAtIndex:[allText length]-1];
-    }
-    
-    NSString * recentWord = [NSString stringWithFormat:@"%C%C", lastLetter,thisLetter];
-    
-    NSCharacterSet *s = [NSCharacterSet lowercaseLetterCharacterSet];
-    s = [s invertedSet];
-    
-    NSRange r = [recentWord rangeOfCharacterFromSet:s];
-    if (r.location != NSNotFound) {
-        NSLog(@"Not an alphanumeric word");
-        return YES;
-    }else{
-        NSLog(@"checking potential: %@",recentWord);
-        if([self shouldDisableAutoComplete:recentWord]){
-            [self disableAutoComplete];
-            [self checkAutoComplete:recentWord];
+    //pass to box or evaluate for suggestion potential
+    if(showingBox){
+        [self continueSuggestions:allText withReplace:text];
+    } else{
+        
+        unichar lastLetter;
+        unichar thisLetter;
+        NSInteger firstIndex;
+        if([text length]){
+            firstIndex = [allText length]-1;
+            lastLetter = [allText characterAtIndex:firstIndex];
+            thisLetter = [text characterAtIndex:0];
+        } else {
+            firstIndex = [allText length]-2;
+            lastLetter = [allText characterAtIndex:firstIndex];
+            thisLetter = [allText characterAtIndex:[allText length]-1];
         }
-        return YES;
+        
+        NSString * recentWord = [NSString stringWithFormat:@"%C%C", lastLetter,thisLetter];
+        
+        NSCharacterSet *s = [NSCharacterSet lowercaseLetterCharacterSet];
+        s = [s invertedSet];
+        
+        NSRange r = [recentWord rangeOfCharacterFromSet:s];
+        if (r.location != NSNotFound) {
+            NSLog(@"Not an alphanumeric word");
+        }else{
+            //prevent autocompletion and show suggestion box instead
+            NSLog(@"checking potential: %@",recentWord);
+            if([self shouldDisableAutoComplete:recentWord]){
+                //disable
+                [self disableAutoComplete];
+                ///show suggestion box
+                [self showAutoComplete:recentWord withStartIndex:firstIndex];
+            }
+        }
     }
+    return YES;
+}
+
+#pragma CNSuggestionViewControllerDelegate
+
+-(void)didSelectWord:(NSString *)word{
+    
+    //replace word with correction
+    NSString * allText = [self text];
+    //delete from firstIndex
+    allText = [allText substringToIndex:firstIndex];
+    allText = [allText stringByAppendingString:word];
+    
+    //replace
+    self.text = allText;
+    
+    //remove suggestion box
+    [self removeListView];
 }
 
 @end

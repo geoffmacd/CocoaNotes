@@ -30,7 +30,8 @@ const char * libName = "UIKit";
         
         for (NSInteger i = 0 ; i < count2; i++) {
             NSString  * className = [NSString stringWithCString:classes[i] encoding:NSStringEncodingConversionAllowLossy];
-            [clas addObject:className];
+            if([[[className substringToIndex:2] lowercaseString] isEqualToString:self.prefix])
+                [clas addObject:className];
         }
     }
 

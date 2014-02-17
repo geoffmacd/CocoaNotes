@@ -7,6 +7,7 @@
 //
 
 #import "CNDetailViewController.h"
+#import "CNSuggestionViewController.h"
 
 @interface CNDetailViewController ()
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
@@ -49,7 +50,7 @@
         self.textView.text = [[self.detailItem valueForKey:@"text"] description];
     }
     
-    self.textView set
+    [self.textView setParentControl:self];
 }
 
 - (void)viewDidLoad
@@ -85,6 +86,22 @@
     // Called when the view is shown again in the split view, invalidating the button and popover controller.
     [self.navigationItem setLeftBarButtonItem:nil animated:YES];
     self.masterPopoverController = nil;
+}
+
+#pragma mark - CNTextViewDelegate
+
+-(BOOL)willShowSuggestionBox:(CNSuggestionViewController *)controller{
+    
+    [self.view addSubview:controller.view];
+    [self addChildViewController:controller];
+    
+    return YES;
+}
+
+-(void)willRemoveSuggestionBox:(CNSuggestionViewController *)controller{
+    
+    [controller removeFromParentViewController];
+    [controller.view removeFromSuperview];
 }
 
 @end

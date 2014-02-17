@@ -36,8 +36,11 @@
     else{
         NSMutableSet * methods = [NSMutableSet new];
         [_classNames enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            if([[obj substringToIndex:[word length]] isEqualToString:word])
-                [methods addObject:obj];
+            if([obj length] >= [word length]){
+                NSString * shortenedClass = [[obj substringToIndex:[word length]] lowercaseString];
+                if([shortenedClass isEqualToString:word])
+                    [methods addObject:obj];
+            }
             
         }];
         return methods;
