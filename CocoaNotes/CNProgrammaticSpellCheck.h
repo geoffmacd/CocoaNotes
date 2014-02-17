@@ -20,6 +20,6 @@
 
 -(instancetype)init;
 -(BOOL)isPotential:(NSString*)word;
--(NSSet*)listClasses:(NSString*)word;
+-(NSArray*)listClasses:(NSString*)word;
 
 @end

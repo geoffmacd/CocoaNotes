@@ -38,42 +38,46 @@
     CocoaCheck * cocoa = [[CocoaCheck alloc] init];
     [_checkers addObject:cocoa];
     
+    //keyboard notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willShowKeyboard:) name:UIKeyboardDidShowNotification object:nil];
+    
 }
 
 - (void)drawRect:(CGRect)rect {
     //draw original textview
     [super drawRect:rect];
     
-    //draw notepad
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:0.8 alpha:0.5].CGColor);
-    
-    // Draw them with a 0.5 stroke width so they are a bit more visible.
-    CGContextSetLineWidth(context, 0.5);
-    
-    CGFloat lineHeight = self.font.lineHeight;
-    CGFloat y = lineHeight / 2;
-    
-    for(NSInteger i = 0; i < 600.0 /lineHeight; i ++){
-        
-        CGContextMoveToPoint(context, 0,y); //start at this point
-        
-        CGContextAddLineToPoint(context, 320, y); //draw to this point
-        
-        // and now draw the Path!
-        CGContextStrokePath(context);
-        
-        y += lineHeight;
-    }
+//    //draw notepad
+//    CGContextRef context = UIGraphicsGetCurrentContext();
+//    CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:0.8 alpha:0.5].CGColor);
+//    
+//    // Draw them with a 0.5 stroke width so they are a bit more visible.
+//    CGContextSetLineWidth(context, 0.5);
+//    
+//    CGFloat lineHeight = self.font.lineHeight;
+//    CGFloat y = lineHeight / 2;
+//    
+//    for(NSInteger i = 0; i < 600.0 /lineHeight; i ++){
+//        
+//        CGContextMoveToPoint(context, 0,y); //start at this point
+//        
+//        CGContextAddLineToPoint(context, 320, y); //draw to this point
+//        
+//        // and now draw the Path!
+//        CGContextStrokePath(context);
+//        
+//        y += lineHeight;
+//    }
 }
 
--(void)showListView:(NSSet*)suggestions withFirstIndex:(NSInteger)first{
+-(void)showListView:(NSArray*)suggestions withFirstIndex:(NSInteger)first{
     
+    CNSuggestionViewController * suggestor = [[CNSuggestionViewController alloc] initWithStyle:UITableViewStylePlain];
     
-    CNSuggestionViewController * suggestor = [[CNSuggestionViewController alloc] initWithStyle:UITableViewStyleGrouped];
+    CGFloat y = self.bounds.size.height - kbSize.height - 200;
     
-    [suggestor.view setFrame:CGRectMake(0, 200, self.bounds.size.width, 100)];
-    [suggestor setList: [suggestions allObjects]];
+    [suggestor.view setFrame:CGRectMake(0, y, self.bounds.size.width, 200)];
+    [suggestor setList: suggestions];
     [suggestor setDelegate:self];
     
     if([self.parentControl willShowSuggestionBox:suggestor]){
@@ -103,26 +107,33 @@
             *stop = YES;
         }
         
+        NSArray * added =[checker listClasses:word];
+        if([added count]){
+            should = YES;
+            NSLog(@"is potential from class list");
+            *stop = YES;
+        }
+        
     }];
     return should;
 }
 
 -(void)showAutoComplete:(NSString*)word withStartIndex:(NSInteger)index{
     
-    __block NSMutableSet * list = [NSMutableSet new];
+    __block NSMutableArray * list = [NSMutableArray new];
     [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
         CNProgrammaticSpellCheck * checker = obj;
-        NSSet * added =[checker listClasses:word];
+        NSArray * added =[checker listClasses:word];
         if([added count]){
             NSLog(@"found suggestions");
-            [list unionSet:added];
+            [list addObjectsFromArray:added];
         }
     }];
     
     //decide to display suggestion box
     if([list count]){
-        [self showListView:[NSSet setWithSet:list] withFirstIndex:index];
+        [self showListView:list withFirstIndex:index];
     }
 }
 
@@ -143,16 +154,19 @@
     //determine whether suggestion box should still be displayed
     
     NSString * constructed = [NSString stringWithFormat:@"%@%@", allText, replacement];
-    if([constructed length] > firstIndex + 1){
+    if([constructed length] > firstIndex + 2){
         constructed = [constructed substringFromIndex:firstIndex];
+        if(![replacement length]){
+            constructed = [constructed substringToIndex:[constructed length]-1];
+        }
         __block NSMutableSet * list = [NSMutableSet new];
         [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             
             CNProgrammaticSpellCheck * checker = obj;
-            NSSet * added =[checker listClasses:constructed];
+            NSArray * added =[checker listClasses:constructed];
             if([added count]){
                 NSLog(@"found suggestions");
-                [list unionSet:added];
+                [list addObjectsFromArray:added];
             }
         }];
         
@@ -167,6 +181,40 @@
         //before first two letters
         [self removeListView];
     }
+}
+
+-(NSString*)mostRecentWord:(NSString*)allText{
+    
+    //find most recent word
+    
+    if([allText length] < 2)
+        return nil;
+    
+    NSInteger index = [allText length]-2;
+    
+    NSMutableCharacterSet * programmaticSet = [NSCharacterSet alphanumericCharacterSet];
+    NSCharacterSet * whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    whitespace = [whitespace invertedSet];
+    //form set with only alphanumeric without whitespaces
+    [programmaticSet formIntersectionWithCharacterSet:whitespace];
+    NSCharacterSet * test = [programmaticSet invertedSet];
+    NSRange r;
+    
+    do {
+        NSString * constructed = [allText substringFromIndex:index];
+        //looking for nonvalid characters
+        r = [constructed rangeOfCharacterFromSet:test options:NSBackwardsSearch];
+        index--;
+        //while the chracter is valid and string has enough length
+    } while (index > 1 && r.location == NSNotFound);
+    
+    if(index < [allText length]-2){
+        //found a programmatic substring
+        NSString * recent  = [allText substringFromIndex:index+2];
+        return [recent lowercaseString];
+    }
+    
+    return nil;
 }
 
 #pragma UITextViewDelegate
@@ -188,35 +236,59 @@
         
         unichar lastLetter;
         unichar thisLetter;
-        NSInteger firstIndex;
+        NSInteger index;
+        NSString * recentWord;
+        
         if([text length]){
-            firstIndex = [allText length]-1;
-            lastLetter = [allText characterAtIndex:firstIndex];
+            //adding character
+            index = [allText length]-1;
+            lastLetter = [allText characterAtIndex:index];
             thisLetter = [text characterAtIndex:0];
+            NSString * recentWord = [[NSString stringWithFormat:@"%C%C", lastLetter,thisLetter] lowercaseString];
+            
+            NSCharacterSet *s = [NSCharacterSet lowercaseLetterCharacterSet];
+            s = [s invertedSet];
+            
+            //is it letterset
+            NSRange r = [recentWord rangeOfCharacterFromSet:s];
+            if (r.location != NSNotFound) {
+                NSLog(@"Not an alphanumeric word");
+            }else{
+                //check previous letter as well
+                if(index - 1 >= 0){
+                    unichar oldLetter = [allText characterAtIndex:index-1];
+                    NSString * testOldLetter = [NSString stringWithFormat:@"%C",oldLetter];
+                    
+                    NSRange r = [testOldLetter rangeOfCharacterFromSet:s];
+                    if (r.location == NSNotFound)
+                        return YES;
+                }
+                
+                //prevent autocompletion and show suggestion box instead
+                NSLog(@"checking potential: %@",recentWord);
+                if([self shouldDisableAutoComplete:recentWord]){
+                    //disable
+                    [self disableAutoComplete];
+                    ///show suggestion box
+                    [self showAutoComplete:recentWord withStartIndex:index];
+                }
+            }
         } else {
-            firstIndex = [allText length]-2;
-            lastLetter = [allText characterAtIndex:firstIndex];
-            thisLetter = [allText characterAtIndex:[allText length]-1];
-        }
-        
-        NSString * recentWord = [NSString stringWithFormat:@"%C%C", lastLetter,thisLetter];
-        
-        NSCharacterSet *s = [NSCharacterSet lowercaseLetterCharacterSet];
-        s = [s invertedSet];
-        
-        NSRange r = [recentWord rangeOfCharacterFromSet:s];
-        if (r.location != NSNotFound) {
-            NSLog(@"Not an alphanumeric word");
-        }else{
-            //prevent autocompletion and show suggestion box instead
-            NSLog(@"checking potential: %@",recentWord);
-            if([self shouldDisableAutoComplete:recentWord]){
-                //disable
-                [self disableAutoComplete];
-                ///show suggestion box
-                [self showAutoComplete:recentWord withStartIndex:firstIndex];
+            //backspacing
+            NSString * removed = [allText substringToIndex:range.location];
+            recentWord = [self mostRecentWord:removed];
+            if(recentWord){
+                //show suggestion box
+                NSLog(@"checking potential: %@",recentWord);
+                if([self shouldDisableAutoComplete:recentWord]){
+                    //disable
+                    [self disableAutoComplete];
+                    ///show suggestion box
+                    [self showAutoComplete:recentWord withStartIndex:range.location - [recentWord length]];
+                }
             }
         }
+
     }
     return YES;
 }
@@ -230,12 +302,29 @@
     //delete from firstIndex
     allText = [allText substringToIndex:firstIndex];
     allText = [allText stringByAppendingString:word];
+    NSRange r;
+    r.length = [word length];
+    r.location = firstIndex;
     
     //replace
     self.text = allText;
     
     //remove suggestion box
     [self removeListView];
+    
+    //highlight
+//    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc]initWithAttributedString:self.attributedText];
+//    [attributedString addAttribute:NSForegroundColorAttributeName  value:[UIColor redColor] range:r];
+//    self.attributedText = attributedString;
 }
+
+#pragma Keyboard notifications
+
+-(void)willShowKeyboard:(NSNotification*)notify{
+    
+    NSDictionary* info = [notify userInfo];
+    kbSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+}
+
 
 @end

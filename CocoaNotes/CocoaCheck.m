@@ -28,15 +28,20 @@ const char * libName = "UIKit";
         const char * name = images[k];
         const char** classes = objc_copyClassNamesForImage(name, &count2);
         
+        NSCharacterSet * underscored = [NSCharacterSet characterSetWithCharactersInString:@"_"];
+        
         for (NSInteger i = 0 ; i < count2; i++) {
             NSString  * className = [NSString stringWithCString:classes[i] encoding:NSStringEncodingConversionAllowLossy];
-            if([[[className substringToIndex:2] lowercaseString] isEqualToString:self.prefix])
+            NSRange r = [className rangeOfCharacterFromSet:underscored];
+            if([[[className substringToIndex:2] lowercaseString] isEqualToString:self.prefix] && r.location == NSNotFound)
                 [clas addObject:className];
         }
+        free(classes);
     }
-
+    free(images);
     
-    self.classNames = clas;
+    //sort by name
+    self.classNames = [clas sortedArrayUsingSelector:@selector(compare:)];
 }
 
 @end

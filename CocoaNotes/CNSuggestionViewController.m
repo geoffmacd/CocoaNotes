@@ -22,6 +22,7 @@ static NSString *CellIdentifier = @"Cell";
     if (self) {
         // Custom initialization
         [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CellIdentifier];
+        [self.tableView setBackgroundColor:[UIColor darkGrayColor]];
     }
     return self;
 }
@@ -55,6 +56,8 @@ static NSString *CellIdentifier = @"Cell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
     [cell.textLabel setText:_list[[indexPath row]]];
+    [cell setBackgroundColor:[UIColor darkGrayColor]];
+    [cell.textLabel setTextColor:[UIColor whiteColor]];
     
     return cell;
 }

@@ -30,21 +30,19 @@
     return NO;
 }
 
--(NSSet*)listClasses:(NSString*)word{
-    if([word length] == 2)
-        return [NSSet setWithArray:self.classNames];
-    else{
-        NSMutableSet * methods = [NSMutableSet new];
-        [_classNames enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            if([obj length] >= [word length]){
-                NSString * shortenedClass = [[obj substringToIndex:[word length]] lowercaseString];
-                if([shortenedClass isEqualToString:word])
-                    [methods addObject:obj];
-            }
-            
-        }];
-        return methods;
-    }
+-(NSArray*)listClasses:(NSString*)word{
+
+    NSMutableArray * methods = [NSMutableArray new];
+    [_classNames enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if([obj length] >= [word length]){
+            NSString * shortenedClass = [[obj substringToIndex:[word length]] lowercaseString];
+            if([shortenedClass isEqualToString:word])
+                [methods addObject:obj];
+        }
+        
+    }];
+    return methods;
+    
 }
 
 @end

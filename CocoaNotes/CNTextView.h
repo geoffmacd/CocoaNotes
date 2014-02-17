@@ -10,6 +10,7 @@
 
 #import "CNSuggestionViewController.h"
 
+
 @protocol CNTextViewDelegate <NSObject>
 
 -(BOOL)willShowSuggestionBox:(CNSuggestionViewController*)controller;
@@ -21,6 +22,7 @@
 @interface CNTextView : UITextView <UITextViewDelegate,NSTextStorageDelegate,CNSuggestionViewControllerDelegate>{
     BOOL showingBox;
     NSInteger firstIndex;
+    CGSize kbSize;
 }
 
 @property UITapGestureRecognizer * tap;
