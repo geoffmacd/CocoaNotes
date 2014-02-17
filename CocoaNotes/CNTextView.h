@@ -8,8 +8,20 @@
 
 #import <UIKit/UIKit.h>
 
+@class CNSuggestionViewViewController;
+
+@protocol CNTextViewDelegate <NSObject>
+
+-(BOOL)willShowSuggestionBox:(CNSuggestionViewViewController*)controller;
+
+@end
+
+
 @interface CNTextView : UITextView <UITextViewDelegate,NSTextStorageDelegate>
 
 @property UITapGestureRecognizer * tap;
+@property NSMutableArray * checkers;
+
+@property (weak) id<CNTextViewDelegate> parentControl;
 
 @end

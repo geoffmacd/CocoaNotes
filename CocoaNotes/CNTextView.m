@@ -1,4 +1,4 @@
-//
+ //
 //  CNTextView.m
 //  CocoaNotes
 //
@@ -7,7 +7,8 @@
 //
 
 #import "CNTextView.h"
-
+#import "CocoaCheck.h"
+#import "CNSuggestionViewViewController.h"
 
 @implementation CNTextView
 
@@ -17,6 +18,7 @@
     if (self) {
         // Initialization code
         [self config];
+        
     }
     return self;
 }
@@ -30,25 +32,13 @@
 
 -(void)config{
     
-//    _tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)];
-//    [self addGestureRecognizer:_tap];
-    
-    for(UIGestureRecognizer  *recog  in [self gestureRecognizers]){
-        NSLog(@"%@", [recog description]);
-    }
-    
-    
     [self setDelegate:self];
     
-    NSTextStorage * storage = self.textStorage;
-    [storage setDelegate:self];
+    _checkers = [NSMutableArray new];
     
-}
-
--(void)tapped:(NSNotification*)notification{
+    CocoaCheck * cocoa = [[CocoaCheck alloc] init];
+    [_checkers addObject:cocoa];
     
-    NSLog(@"%@", [notification description]);
-    [self setEditable:!self.editable];
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -76,7 +66,46 @@
         
         y += lineHeight;
     }
+}
+
+-(void)showListView:(NSString*)word{
     
+    
+    CNSuggestionViewViewController * suggestor = [[CNSuggestionViewViewController alloc] initWithStyle:UITableViewStyleGrouped];
+    
+    
+    [self.parentControl willShowSuggestionBox:suggestor];
+}
+
+-(BOOL)shouldDisableAutoComplete:(NSString*)word{
+    
+    __block BOOL should = NO;
+    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        CNProgrammaticSpellCheck * checker = obj;
+        if([checker isPotential:word]){
+            should = YES;
+            NSLog(@"is potential");
+            *stop = YES;
+        }
+        
+    }];
+    return should;
+}
+
+-(void)checkAutoComplete:(NSString*)word{
+    
+}
+
+-(void)disableAutoComplete{
+    
+    NSRange rangeCopy = self.selectedRange;
+    NSString *textCopy = self.text.copy;
+    NSLog(@"disabled autocomplete");
+    [self resignFirstResponder];
+    [self becomeFirstResponder];
+    [self setText:textCopy];
+    [self setSelectedRange:rangeCopy];
     
 }
 
@@ -85,18 +114,40 @@
 
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
     
-    NSLog(@"%@",text);
-    return YES;
-}
-
-#pragma NSTextStorageDelegate
-
--(void)textStorage:(NSTextStorage *)textStorage willProcessEditing:(NSTextStorageEditActions)editedMask range:(NSRange)editedRange changeInLength:(NSInteger)delta{
-
-}
-
--(void)textStorage:(NSTextStorage *)textStorage didProcessEditing:(NSTextStorageEditActions)editedMask range:(NSRange)editedRange changeInLength:(NSInteger)delta{
+    NSLog(@"replacement: %@",text);
     
+    NSString * allText = [textView text];
+    
+    if(![allText length])
+        return YES;
+    
+    unichar lastLetter;
+    unichar thisLetter;
+    if([text length]){
+        lastLetter = [allText characterAtIndex:[allText length]-1];
+        thisLetter = [text characterAtIndex:0];
+    } else {
+        lastLetter = [allText characterAtIndex:[allText length]-2];
+        thisLetter = [allText characterAtIndex:[allText length]-1];
+    }
+    
+    NSString * recentWord = [NSString stringWithFormat:@"%C%C", lastLetter,thisLetter];
+    
+    NSCharacterSet *s = [NSCharacterSet lowercaseLetterCharacterSet];
+    s = [s invertedSet];
+    
+    NSRange r = [recentWord rangeOfCharacterFromSet:s];
+    if (r.location != NSNotFound) {
+        NSLog(@"Not an alphanumeric word");
+        return YES;
+    }else{
+        NSLog(@"checking potential: %@",recentWord);
+        if([self shouldDisableAutoComplete:recentWord]){
+            [self disableAutoComplete];
+            [self checkAutoComplete:recentWord];
+        }
+        return YES;
+    }
 }
 
 @end

@@ -48,6 +48,8 @@
     if (self.detailItem) {
         self.textView.text = [[self.detailItem valueForKey:@"text"] description];
     }
+    
+    self.textView set
 }
 
 - (void)viewDidLoad
