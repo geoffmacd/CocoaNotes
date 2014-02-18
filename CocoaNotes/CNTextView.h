@@ -23,6 +23,8 @@
     BOOL showingBox;
     NSInteger firstIndex;
     CGSize kbSize;
+    CGRect _oldRect;
+    NSTimer * _caretVisibilityTimer;
 }
 
 @property UITapGestureRecognizer * tap;

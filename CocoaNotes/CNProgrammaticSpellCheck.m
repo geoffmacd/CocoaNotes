@@ -25,8 +25,11 @@
 
 -(BOOL)isPotential:(NSString*)word{
     //does first two letters at least match prefix??
-    if([word length] > 1)
-        return ([[word lowercaseString] isEqualToString:self.prefix]);
+    if([word length] > 1){
+        //return is at least one
+        NSArray * l = [self listClasses:[word lowercaseString]];
+        return ([l count]);
+    }
     return NO;
 }
 
@@ -41,6 +44,7 @@
         }
         
     }];
+    
     return methods;
     
 }

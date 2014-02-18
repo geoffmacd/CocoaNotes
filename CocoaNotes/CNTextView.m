@@ -8,6 +8,7 @@
 
 #import "CNTextView.h"
 #import "CocoaCheck.h"
+#import "FoundationCheck.h"
 
 @implementation CNTextView
 
@@ -38,9 +39,15 @@
     CocoaCheck * cocoa = [[CocoaCheck alloc] init];
     [_checkers addObject:cocoa];
     
-    //keyboard notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willShowKeyboard:) name:UIKeyboardDidShowNotification object:nil];
+    FoundationCheck * found = [[FoundationCheck alloc] init];
+    [_checkers addObject:found];
     
+    //keyboard notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:UIKeyboardWillHideNotification object:nil];
+    
+    self.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
+
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -80,7 +87,17 @@
     [suggestor setList: suggestions];
     [suggestor setDelegate:self];
     
+    
     if([self.parentControl willShowSuggestionBox:suggestor]){
+        
+        UIEdgeInsets insets = self.contentInset;
+        insets.bottom += _suggestionBox.view.frame.size.height;
+        self.contentInset = insets;
+        
+        insets = self.scrollIndicatorInsets;
+        insets.bottom += _suggestionBox.view.frame.size.height;
+        self.scrollIndicatorInsets = insets;
+        
         _suggestionBox = suggestor;
         firstIndex = first;
         showingBox = YES;
@@ -88,6 +105,14 @@
 }
 
 -(void)removeListView{
+    
+    UIEdgeInsets insets = self.contentInset;
+    insets.bottom -= _suggestionBox.view.frame.size.height;
+    self.contentInset = insets;
+    
+    insets = self.scrollIndicatorInsets;
+    insets.bottom -= _suggestionBox.view.frame.size.height;
+    self.scrollIndicatorInsets = insets;
     
     [self.parentControl willRemoveSuggestionBox:_suggestionBox];
     showingBox = NO;
@@ -159,7 +184,8 @@
         if(![replacement length]){
             constructed = [constructed substringToIndex:[constructed length]-1];
         }
-        __block NSMutableSet * list = [NSMutableSet new];
+        
+        __block NSMutableArray * list = [NSMutableArray new];
         [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             
             CNProgrammaticSpellCheck * checker = obj;
@@ -172,7 +198,7 @@
         
         if([list count]){
             //update words
-            [self.suggestionBox setList:[list allObjects]];
+            [self.suggestionBox setList:list];
         } else {
             //remove suggestion box
             [self removeListView];
@@ -320,10 +346,69 @@
 
 #pragma Keyboard notifications
 
--(void)willShowKeyboard:(NSNotification*)notify{
+-(void)didShowKeyboard:(NSNotification*)notify{
     
-    NSDictionary* info = [notify userInfo];
-    kbSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    kbSize = [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    
+    UIEdgeInsets insets = self.contentInset;
+    insets.bottom += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+    self.contentInset = insets;
+    
+    insets = self.scrollIndicatorInsets;
+    insets.bottom += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+    self.scrollIndicatorInsets = insets;
+}
+
+-(void)willHideKeyboard:(NSNotification*)notify{
+    
+    kbSize = CGSizeZero;
+    
+    UIEdgeInsets insets = self.contentInset;
+    insets.bottom -= [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size.height;
+    self.contentInset = insets;
+    
+    insets = self.scrollIndicatorInsets;
+    insets.bottom -= [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size.height;
+    self.scrollIndicatorInsets = insets;
+}
+
+- (void)_scrollCaretToVisible
+{
+    //This is where the cursor is at.
+    CGRect caretRect = [self caretRectForPosition:self.selectedTextRange.end];
+    
+    if(CGRectEqualToRect(caretRect, _oldRect))
+        return;
+    
+    _oldRect = caretRect;
+    
+    //This is the visible rect of the textview.
+    CGRect visibleRect = self.bounds;
+    visibleRect.size.height -= (self.contentInset.top + self.contentInset.bottom);
+    visibleRect.origin.y = self.contentOffset.y;
+    
+    //We will scroll only if the caret falls outside of the visible rect.
+    if(!CGRectContainsRect(visibleRect, caretRect))
+    {
+        CGPoint newOffset = self.contentOffset;
+        
+        newOffset.y = MAX((caretRect.origin.y + caretRect.size.height) - visibleRect.size.height + 5, 0);
+        
+        [self setContentOffset:newOffset animated:YES];
+    }
+}
+
+- (void)textViewDidBeginEditing:(UITextView *)textView
+{
+    _oldRect = [self caretRectForPosition:self.selectedTextRange.end];
+    
+    _caretVisibilityTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(_scrollCaretToVisible) userInfo:nil repeats:YES];
+}
+
+- (void)textViewDidEndEditing:(UITextView *)textView
+{
+    [_caretVisibilityTimer invalidate];
+    _caretVisibilityTimer = nil;
 }
 
 

@@ -12,10 +12,14 @@
 
 @implementation CocoaCheck
 
-const char * libName = "UIKit";
+
+static NSArray * a;
+
 
 -(void)config{
     self.prefix = @"ui";
+    
+    a = @[@"corefoundation",@"coredata",@"coregraphics",@"uikit"];
     
     //generate method names from objc
     unsigned int count1;
@@ -26,17 +30,23 @@ const char * libName = "UIKit";
         
         unsigned int count2;
         const char * name = images[k];
-        const char** classes = objc_copyClassNamesForImage(name, &count2);
+        NSString * libName = [NSString stringWithCString:name encoding:NSStringEncodingConversionAllowLossy];
+        libName = [[[libName lastPathComponent] stringByDeletingPathExtension] lowercaseString];
         
-        NSCharacterSet * underscored = [NSCharacterSet characterSetWithCharactersInString:@"_"];
-        
-        for (NSInteger i = 0 ; i < count2; i++) {
-            NSString  * className = [NSString stringWithCString:classes[i] encoding:NSStringEncodingConversionAllowLossy];
-            NSRange r = [className rangeOfCharacterFromSet:underscored];
-            if([[[className substringToIndex:2] lowercaseString] isEqualToString:self.prefix] && r.location == NSNotFound)
-                [clas addObject:className];
+        //test if in our list
+        if([a indexOfObject:libName] != NSNotFound){
+            const char** classes = objc_copyClassNamesForImage(name, &count2);
+            
+            NSCharacterSet * underscored = [NSCharacterSet characterSetWithCharactersInString:@"_"];
+            
+            for (NSInteger i = 0 ; i < count2; i++) {
+                NSString  * className = [NSString stringWithCString:classes[i] encoding:NSStringEncodingConversionAllowLossy];
+                NSRange r = [className rangeOfCharacterFromSet:underscored];
+                if([[[className substringToIndex:2] lowercaseString] isEqualToString:self.prefix] && r.location == NSNotFound)
+                    [clas addObject:className];
+            }
+            free(classes);
         }
-        free(classes);
     }
     free(images);
     

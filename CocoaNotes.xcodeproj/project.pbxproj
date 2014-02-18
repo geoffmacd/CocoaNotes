@@ -124,10 +124,6 @@
 				24E90F9F18ADBAA800DF9FB4 /* Tag.m */,
 				24E90F9B18ADBAA700DF9FB4 /* Note.h */,
 				24E90F9C18ADBAA700DF9FB4 /* Note.m */,
-				24D2DCC518B07AA7000E73DD /* CocoaCheck.h */,
-				24D2DCC618B07AA7000E73DD /* CocoaCheck.m */,
-				24D2DCC818B07AB4000E73DD /* FoundationCheck.h */,
-				24D2DCC918B07AB4000E73DD /* FoundationCheck.m */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -152,6 +148,10 @@
 				C3EEDB4518AD5E30003CC23D /* CNMasterViewController.m */,
 				C3EEDB4718AD5E30003CC23D /* CNDetailViewController.h */,
 				C3EEDB4818AD5E30003CC23D /* CNDetailViewController.m */,
+				24D2DCC518B07AA7000E73DD /* CocoaCheck.h */,
+				24D2DCC618B07AA7000E73DD /* CocoaCheck.m */,
+				24D2DCC818B07AB4000E73DD /* FoundationCheck.h */,
+				24D2DCC918B07AB4000E73DD /* FoundationCheck.m */,
 				24D2DCC218B077DB000E73DD /* CNProgrammaticSpellCheck.h */,
 				24D2DCC318B077DB000E73DD /* CNProgrammaticSpellCheck.m */,
 			);
