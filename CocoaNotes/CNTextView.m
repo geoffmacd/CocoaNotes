@@ -120,8 +120,9 @@
     _suggestionBox = nil;
 }
 
--(BOOL)shouldDisableAutoComplete:(NSString*)word{
+-(BOOL)shouldAutoComplete:(NSString*)word{
     
+    //check checkers for any matches without returning them
     __block BOOL should = NO;
     [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
@@ -131,14 +132,6 @@
             NSLog(@"is potential");
             *stop = YES;
         }
-        
-        NSArray * added =[checker listClasses:word];
-        if([added count]){
-            should = YES;
-            NSLog(@"is potential from class list");
-            *stop = YES;
-        }
-        
     }];
     return should;
 }
@@ -166,7 +159,6 @@
     
     NSRange rangeCopy = self.selectedRange;
     NSString *textCopy = self.text.copy;
-    NSLog(@"disabled autocomplete");
     [self resignFirstResponder];
     [self becomeFirstResponder];
     [self setText:textCopy];
@@ -209,14 +201,13 @@
     }
 }
 
--(NSString*)mostRecentWord:(NSString*)allText{
-    
-    //find most recent word
-    
-    if([allText length] < 2)
-        return nil;
-    
-    NSInteger index = [allText length]-2;
+/**
+ Finds most recent word behind location from allText
+ @param allText text in UITextView
+ @param location location of cursor
+ @return most recent word or else nil if invalid characters between location and alphanumeric characters
+ */
+-(NSString*)mostRecentWord:(NSString*)allText atLocation:(NSInteger)location{
     
     NSMutableCharacterSet * programmaticSet = [NSCharacterSet alphanumericCharacterSet];
     NSCharacterSet * whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
@@ -224,19 +215,32 @@
     //form set with only alphanumeric without whitespaces
     [programmaticSet formIntersectionWithCharacterSet:whitespace];
     NSCharacterSet * test = [programmaticSet invertedSet];
+    
     NSRange r;
+    NSRange s;
+    s.length = 0;
+    s.location = location;
     
     do {
-        NSString * constructed = [allText substringFromIndex:index];
-        //looking for nonvalid characters
+        //move string constructor range back
+        s.location--;
+        s.length++;
+        //get newly constructed string
+        NSString * constructed = [allText substringWithRange:s];
+        //looking for first range of nonvalid characters
         r = [constructed rangeOfCharacterFromSet:test options:NSBackwardsSearch];
-        index--;
         //while the chracter is valid and string has enough length
-    } while (index > 1 && r.location == NSNotFound);
+    } while (s.location > 0 && r.location == NSNotFound);
     
-    if(index < [allText length]-2){
+    
+    s.location--;
+    s.length++;
+    
+    //if at least two letters long
+    if(s.location <  location - 1){
         //found a programmatic substring
-        NSString * recent  = [allText substringFromIndex:index+2];
+        NSString * recent  = [allText substringWithRange:s];
+        //always lowercase
         return [recent lowercaseString];
     }
     
@@ -247,75 +251,49 @@
 
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
 
-    
     //determine if last two letters denote a possible class
-    NSLog(@"replacement text: %@",text);
+    NSLog(@"replacement text: %@    at location: %d  with length: %d",text, range.location, range.length);
     
-    NSString * allText = [textView text];
-    if(![allText length])
+    //return immediately if not applicable
+    if(range.location < 2)
         return YES;
+    
+    NSMutableString * replacedText = [NSMutableString stringWithString:[textView text]];
     
     //pass to box or evaluate for suggestion potential
     if(showingBox){
-        [self continueSuggestions:allText withReplace:text];
+        
+        //pass changes to suggestion box
+        [self continueSuggestions:replacedText withReplace:text];
+        
     } else{
-        
-        unichar lastLetter;
-        unichar thisLetter;
-        NSInteger index;
-        NSString * recentWord;
-        
+        //determine potential for correction
         if([text length]){
             //adding character
-            index = [allText length]-1;
-            lastLetter = [allText characterAtIndex:index];
-            thisLetter = [text characterAtIndex:0];
-            NSString * recentWord = [[NSString stringWithFormat:@"%C%C", lastLetter,thisLetter] lowercaseString];
+        
+            //add the next letter
+            [replacedText insertString:text atIndex:range.location];
+            range.location++;
+        }else {
+            //backspaced
             
-            NSCharacterSet *s = [NSCharacterSet lowercaseLetterCharacterSet];
-            s = [s invertedSet];
-            
-            //is it letterset
-            NSRange r = [recentWord rangeOfCharacterFromSet:s];
-            if (r.location != NSNotFound) {
-                NSLog(@"Not an alphanumeric word");
-            }else{
-                //check previous letter as well
-                if(index - 1 >= 0){
-                    unichar oldLetter = [allText characterAtIndex:index-1];
-                    NSString * testOldLetter = [NSString stringWithFormat:@"%C",oldLetter];
-                    
-                    NSRange r = [testOldLetter rangeOfCharacterFromSet:s];
-                    if (r.location == NSNotFound)
-                        return YES;
-                }
+            //remove last letter
+            [replacedText deleteCharactersInRange:range];
+        }
+        NSString* recentWord = [self mostRecentWord:replacedText atLocation:range.location];
+        if(recentWord){
+            if([self shouldAutoComplete:recentWord]){
                 
-                //prevent autocompletion and show suggestion box instead
-                NSLog(@"checking potential: %@",recentWord);
-                if([self shouldDisableAutoComplete:recentWord]){
-                    //disable
-                    [self disableAutoComplete];
-                    ///show suggestion box
-                    [self showAutoComplete:recentWord withStartIndex:index];
-                }
-            }
-        } else {
-            //backspacing
-            NSString * removed = [allText substringToIndex:range.location];
-            recentWord = [self mostRecentWord:removed];
-            if(recentWord){
                 //show suggestion box
                 NSLog(@"checking potential: %@",recentWord);
-                if([self shouldDisableAutoComplete:recentWord]){
-                    //disable
-                    [self disableAutoComplete];
-                    ///show suggestion box
-                    [self showAutoComplete:recentWord withStartIndex:range.location - [recentWord length]];
-                }
+                //disable
+                [self disableAutoComplete];
+                ///show suggestion box
+                [self showAutoComplete:recentWord withStartIndex:range.location - [recentWord length]];
             }
         }
-
     }
+    //continue with replacements
     return YES;
 }
 
