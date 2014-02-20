@@ -98,6 +98,11 @@
         insets.bottom += _suggestionBox.view.frame.size.height;
         self.scrollIndicatorInsets = insets;
         
+        //scroll to text
+        NSRange range;
+        range.location = first;
+        [self scrollRangeToVisible:range];
+        
         _suggestionBox = suggestor;
         firstIndex = first;
         showingBox = YES;
@@ -166,22 +171,17 @@
     
 }
 
--(void)continueSuggestions:(NSString*)allText withReplace:(NSString*)replacement{
+-(BOOL)continueSuggestions:(NSString*)recentWord{
     
     //determine whether suggestion box should still be displayed
     
-    NSString * constructed = [NSString stringWithFormat:@"%@%@", allText, replacement];
-    if([constructed length] > firstIndex + 2){
-        constructed = [constructed substringFromIndex:firstIndex];
-        if(![replacement length]){
-            constructed = [constructed substringToIndex:[constructed length]-1];
-        }
+    if([recentWord length] >  2){
         
         __block NSMutableArray * list = [NSMutableArray new];
         [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             
             CNProgrammaticSpellCheck * checker = obj;
-            NSArray * added =[checker listClasses:constructed];
+            NSArray * added =[checker listClasses:recentWord];
             if([added count]){
                 NSLog(@"found suggestions");
                 [list addObjectsFromArray:added];
@@ -191,6 +191,7 @@
         if([list count]){
             //update words
             [self.suggestionBox setList:list];
+            return YES;
         } else {
             //remove suggestion box
             [self removeListView];
@@ -199,6 +200,20 @@
         //before first two letters
         [self removeListView];
     }
+    return NO;
+}
+
+-(NSString*)replaceUserEnteredWord:(NSString*)userWord{
+    
+    //use suggestions
+    NSArray * suggestions = [self.suggestionBox list];
+    
+    if([suggestions count] == 0)
+        return nil;
+    else{
+        return suggestions[0];
+    }
+    
 }
 
 /**
@@ -209,15 +224,16 @@
  */
 -(NSString*)mostRecentWord:(NSString*)allText atLocation:(NSInteger)location{
     
-    NSMutableCharacterSet * programmaticSet = [NSCharacterSet alphanumericCharacterSet];
-    NSCharacterSet * whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-    whitespace = [whitespace invertedSet];
-    //form set with only alphanumeric without whitespaces
-    [programmaticSet formIntersectionWithCharacterSet:whitespace];
-    NSCharacterSet * test = [programmaticSet invertedSet];
+    if(!invalidCharSet){
+        NSMutableCharacterSet * programmaticSet = [NSCharacterSet alphanumericCharacterSet];
+        NSCharacterSet * whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+        whitespace = [whitespace invertedSet];
+        //form set with only alphanumeric without whitespaces
+        [programmaticSet formIntersectionWithCharacterSet:whitespace];
+        invalidCharSet = [programmaticSet invertedSet];
+    }
     
-    NSRange r;
-    NSRange s;
+    NSRange s,r;
     s.length = 0;
     s.location = location;
     
@@ -228,13 +244,15 @@
         //get newly constructed string
         NSString * constructed = [allText substringWithRange:s];
         //looking for first range of nonvalid characters
-        r = [constructed rangeOfCharacterFromSet:test options:NSBackwardsSearch];
+        r = [constructed rangeOfCharacterFromSet:invalidCharSet options:NSBackwardsSearch];
         //while the chracter is valid and string has enough length
     } while (s.location > 0 && r.location == NSNotFound);
     
     
-    s.location--;
-    s.length++;
+    if(r.location != NSNotFound){
+        s.location++;
+        s.length--;
+    }
     
     //if at least two letters long
     if(s.location <  location - 1){
@@ -255,33 +273,54 @@
     NSLog(@"replacement text: %@    at location: %d  with length: %d",text, range.location, range.length);
     
     //return immediately if not applicable
-    if(range.location < 2)
+    if(range.location == 0)
         return YES;
     
     NSMutableString * replacedText = [NSMutableString stringWithString:[textView text]];
     
-    //pass to box or evaluate for suggestion potential
+    //determine potential for correction
+    if([text length]){
+        //adding character
+        
+        //add the next letter
+        [replacedText insertString:text atIndex:range.location];
+        range.location++;
+    }else {
+        //backspaced
+        
+        //remove last letter
+        [replacedText deleteCharactersInRange:range];
+    }
+    NSString* recentWord = [self mostRecentWord:replacedText atLocation:range.location];
+        
     if(showingBox){
         
-        //pass changes to suggestion box
-        [self continueSuggestions:replacedText withReplace:text];
+        if(recentWord){
+        
+            //pass changes to suggestion box
+            [self continueSuggestions:recentWord];
+        } else if([text isEqualToString:@" "]) {
+            //user pressed space after completing word, now replace with caps
+            //chop off space
+            range.location--;
+            recentWord = [self mostRecentWord:replacedText atLocation:range.location];
+            NSString * replaceStr = [self replaceUserEnteredWord:recentWord];
+            if(replaceStr) {
+                NSMutableString * allText = [NSMutableString stringWithString:textView.text];
+                NSRange r;
+                r.location = range.location - [recentWord length];
+                r.length = [recentWord length];
+                [allText replaceCharactersInRange:r withString:replaceStr];
+                //replace textview text
+                textView.text = [NSString stringWithString:allText];
+                
+                //remove list
+                [self removeListView];
+            }
+        }
         
     } else{
-        //determine potential for correction
-        if([text length]){
-            //adding character
-        
-            //add the next letter
-            [replacedText insertString:text atIndex:range.location];
-            range.location++;
-        }else {
-            //backspaced
-            
-            //remove last letter
-            [replacedText deleteCharactersInRange:range];
-        }
-        NSString* recentWord = [self mostRecentWord:replacedText atLocation:range.location];
-        if(recentWord){
+        if([recentWord length] >= 2){
             if([self shouldAutoComplete:recentWord]){
                 
                 //show suggestion box
@@ -389,5 +428,8 @@
     _caretVisibilityTimer = nil;
 }
 
+-(void)textViewDidChangeSelection:(UITextView *)textView{
+    
+}
 
 @end

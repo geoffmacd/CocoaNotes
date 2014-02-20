@@ -25,6 +25,7 @@
     CGSize kbSize;
     CGRect _oldRect;
     NSTimer * _caretVisibilityTimer;
+    NSCharacterSet * invalidCharSet;
 }
 
 @property UITapGestureRecognizer * tap;
