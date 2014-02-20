@@ -20,7 +20,7 @@
 }
 
 -(void)config{
-    //implemented by sublcasses
+    //implemented by subclasses
 }
 
 -(BOOL)isPotential:(NSString*)word{

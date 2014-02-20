@@ -26,6 +26,7 @@
     CGRect _oldRect;
     NSTimer * _caretVisibilityTimer;
     NSCharacterSet * invalidCharSet;
+    NSUInteger curLoc;
 }
 
 @property UITapGestureRecognizer * tap;

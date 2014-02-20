@@ -123,6 +123,7 @@
     showingBox = NO;
     firstIndex = -1;
     _suggestionBox = nil;
+    curLoc = 0;
 }
 
 -(BOOL)shouldAutoComplete:(NSString*)word{
@@ -216,6 +217,18 @@
     
 }
 
+-(void)replaceWordInTextView:(NSString*)replacement{
+    
+    NSMutableString * allText = [NSMutableString stringWithString:self.text];
+    NSRange r;
+    r.location = firstIndex;
+    r.length = curLoc - firstIndex - 1;
+    [allText deleteCharactersInRange:r];
+    [allText insertString:replacement atIndex:firstIndex];
+    //replace textview text
+    self.text = [NSString stringWithString:allText];
+}
+
 /**
  Finds most recent word behind location from allText
  @param allText text in UITextView
@@ -295,6 +308,8 @@
         
     if(showingBox){
         
+        curLoc = range.location;
+        
         if(recentWord){
         
             //pass changes to suggestion box
@@ -306,13 +321,8 @@
             recentWord = [self mostRecentWord:replacedText atLocation:range.location];
             NSString * replaceStr = [self replaceUserEnteredWord:recentWord];
             if(replaceStr) {
-                NSMutableString * allText = [NSMutableString stringWithString:textView.text];
-                NSRange r;
-                r.location = range.location - [recentWord length];
-                r.length = [recentWord length];
-                [allText replaceCharactersInRange:r withString:replaceStr];
-                //replace textview text
-                textView.text = [NSString stringWithString:allText];
+                
+                [self replaceWordInTextView:replaceStr];
                 
                 //remove list
                 [self removeListView];
@@ -340,17 +350,8 @@
 
 -(void)didSelectWord:(NSString *)word{
     
-    //replace word with correction
-    NSString * allText = [self text];
-    //delete from firstIndex
-    allText = [allText substringToIndex:firstIndex];
-    allText = [allText stringByAppendingString:word];
-    NSRange r;
-    r.length = [word length];
-    r.location = firstIndex;
     
-    //replace
-    self.text = allText;
+    [self replaceWordInTextView:word];
     
     //remove suggestion box
     [self removeListView];
