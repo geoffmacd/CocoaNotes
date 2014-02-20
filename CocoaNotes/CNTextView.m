@@ -14,25 +14,46 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrame:frame];
+    NSTextContainer * container = [self customContainer:frame];
+    self = [super initWithFrame:frame textContainer:container];
     if (self) {
         // Initialization code
-        [self config];
+        [self config]; 
         
     }
     return self;
 }
 
--(id)initWithCoder:(NSCoder *)aDecoder{
-    self = [super initWithCoder:aDecoder];
-    if(self)
-        [self config];
-    return self;
+-(NSTextContainer*)customContainer:(CGRect)frame{
+    
+    NSDictionary* attrs = @{NSFontAttributeName:
+                                [UIFont preferredFontForTextStyle:UIFontTextStyleBody]};
+    NSAttributedString* attrString = [[NSAttributedString alloc]
+                                      initWithString:@""
+                                      attributes:attrs];
+    _storage = [CNTextStorage new];
+    _storage.delegate = self;
+    [_storage appendAttributedString:attrString];
+    
+    // 2. Create the layout manager
+    NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+    
+    // 3. Create a text container
+    CGSize containerSize = CGSizeMake(frame.size.width, CGFLOAT_MAX);
+    NSTextContainer *container = [[NSTextContainer alloc] initWithSize:containerSize];
+    container.widthTracksTextView = YES;
+    [layoutManager addTextContainer:container];
+    [_storage addLayoutManager:layoutManager];
+    
+    return container;
 }
 
 -(void)config{
     
     [self setDelegate:self];
+    
+    //nav bar
+    [self setContentInset:UIEdgeInsetsMake(64, 0, 0, 0)];
     
     _checkers = [NSMutableArray new];
     
@@ -45,9 +66,22 @@
     //keyboard notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:UIKeyboardWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preferredContentSizeChanged) name:UIContentSizeCategoryDidChangeNotification object:nil];
     
     self.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
 
+
+    self.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+}
+
+-(void)preferredContentSizeChanged{
+    
+    self.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+}
+
+-(void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidHideNotification object:nil];
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -101,6 +135,7 @@
         //scroll to text
         NSRange range;
         range.location = first;
+        range.length = 0;
         [self scrollRangeToVisible:range];
         
         _suggestionBox = suggestor;
@@ -222,11 +257,14 @@
     NSMutableString * allText = [NSMutableString stringWithString:self.text];
     NSRange r;
     r.location = firstIndex;
-    r.length = curLoc - firstIndex - 1;
+    r.length = curLoc - firstIndex;
+    while(r.location + r.length > [allText length])
+        r.length--;
     [allText deleteCharactersInRange:r];
     [allText insertString:replacement atIndex:firstIndex];
     //replace textview text
     self.text = [NSString stringWithString:allText];
+
 }
 
 /**
@@ -328,7 +366,7 @@
                 [self removeListView];
             }
         }
-        
+        [self disableAutoComplete];
     } else{
         if([recentWord length] >= 2){
             if([self shouldAutoComplete:recentWord]){
@@ -346,20 +384,32 @@
     return YES;
 }
 
+- (void)textViewDidBeginEditing:(UITextView *)textView
+{
+    _oldRect = [self caretRectForPosition:self.selectedTextRange.end];
+    
+    _caretVisibilityTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(_scrollCaretToVisible) userInfo:nil repeats:YES];
+}
+
+- (void)textViewDidEndEditing:(UITextView *)textView
+{
+    [_caretVisibilityTimer invalidate];
+    _caretVisibilityTimer = nil;
+}
+
+-(void)textViewDidChangeSelection:(UITextView *)textView{
+    
+}
+
 #pragma CNSuggestionViewControllerDelegate
 
 -(void)didSelectWord:(NSString *)word{
     
-    
+    //repace text
     [self replaceWordInTextView:word];
     
     //remove suggestion box
     [self removeListView];
-    
-    //highlight
-//    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc]initWithAttributedString:self.attributedText];
-//    [attributedString addAttribute:NSForegroundColorAttributeName  value:[UIColor redColor] range:r];
-//    self.attributedText = attributedString;
 }
 
 #pragma Keyboard notifications
@@ -416,21 +466,17 @@
     }
 }
 
-- (void)textViewDidBeginEditing:(UITextView *)textView
-{
-    _oldRect = [self caretRectForPosition:self.selectedTextRange.end];
+#pragma CNTextStorageDelegate
+
+-(void)processEditingForAttributes{
     
-    _caretVisibilityTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(_scrollCaretToVisible) userInfo:nil repeats:YES];
+    NSString * allText = _storage.string;
+    
+    NSRange r = {0, [allText length]/2};
+    
+    [_storage addAttribute:NSFontAttributeName value:[UIColor yellowColor] range:r];
 }
 
-- (void)textViewDidEndEditing:(UITextView *)textView
-{
-    [_caretVisibilityTimer invalidate];
-    _caretVisibilityTimer = nil;
-}
 
--(void)textViewDidChangeSelection:(UITextView *)textView{
-    
-}
 
 @end

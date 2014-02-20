@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 #import "CNSuggestionViewController.h"
+#import "CNTextStorage.h"
 
 
 @protocol CNTextViewDelegate <NSObject>
@@ -19,7 +20,7 @@
 @end
 
 
-@interface CNTextView : UITextView <UITextViewDelegate,NSTextStorageDelegate,CNSuggestionViewControllerDelegate>{
+@interface CNTextView : UITextView <UITextViewDelegate,NSTextStorageDelegate,CNSuggestionViewControllerDelegate,CNTextStorageDelegate>{
     BOOL showingBox;
     NSInteger firstIndex;
     CGSize kbSize;
@@ -27,6 +28,7 @@
     NSTimer * _caretVisibilityTimer;
     NSCharacterSet * invalidCharSet;
     NSUInteger curLoc;
+    CNTextStorage * _storage;
 }
 
 @property UITapGestureRecognizer * tap;

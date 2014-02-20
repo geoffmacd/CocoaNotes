@@ -9,10 +9,11 @@
 #import <UIKit/UIKit.h>
 #import "CNTextView.h"
 
-@interface CNDetailViewController : UIViewController <UISplitViewControllerDelegate,CNTextViewDelegate>
+@interface CNDetailViewController : UIViewController <UISplitViewControllerDelegate,CNTextViewDelegate>{
+    CNTextView * _textView;
+}
 
 @property (strong, nonatomic) id detailItem;
 
-@property (weak, nonatomic) IBOutlet CNTextView *textView;
 @property NSManagedObjectContext * context;
 @end

@@ -14,6 +14,7 @@
 		24E90F9A18ADB29F00DF9FB4 /* CNTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9918ADB29F00DF9FB4 /* CNTextView.m */; };
 		24E90F9D18ADBAA700DF9FB4 /* Note.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9C18ADBAA700DF9FB4 /* Note.m */; };
 		24E90FA018ADBAA800DF9FB4 /* Tag.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E90F9F18ADBAA800DF9FB4 /* Tag.m */; };
+		C3C8B19518B6A466000B739E /* CNTextStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = C3C8B19418B6A466000B739E /* CNTextStorage.m */; };
 		C3EEDB2818AD5E30003CC23D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EEDB2718AD5E30003CC23D /* Foundation.framework */; };
 		C3EEDB2A18AD5E30003CC23D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EEDB2918AD5E30003CC23D /* CoreGraphics.framework */; };
 		C3EEDB2C18AD5E30003CC23D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3EEDB2B18AD5E30003CC23D /* UIKit.framework */; };
@@ -21,8 +22,6 @@
 		C3EEDB3418AD5E30003CC23D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C3EEDB3218AD5E30003CC23D /* InfoPlist.strings */; };
 		C3EEDB3618AD5E30003CC23D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C3EEDB3518AD5E30003CC23D /* main.m */; };
 		C3EEDB3A18AD5E30003CC23D /* CNAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C3EEDB3918AD5E30003CC23D /* CNAppDelegate.m */; };
-		C3EEDB3D18AD5E30003CC23D /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3EEDB3B18AD5E30003CC23D /* Main_iPhone.storyboard */; };
-		C3EEDB4018AD5E30003CC23D /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3EEDB3E18AD5E30003CC23D /* Main_iPad.storyboard */; };
 		C3EEDB4318AD5E30003CC23D /* CocoaNotes.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C3EEDB4118AD5E30003CC23D /* CocoaNotes.xcdatamodeld */; };
 		C3EEDB4618AD5E30003CC23D /* CNMasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C3EEDB4518AD5E30003CC23D /* CNMasterViewController.m */; };
 		C3EEDB4918AD5E30003CC23D /* CNDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C3EEDB4818AD5E30003CC23D /* CNDetailViewController.m */; };
@@ -62,6 +61,8 @@
 		24E90F9C18ADBAA700DF9FB4 /* Note.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Note.m; sourceTree = "<group>"; };
 		24E90F9E18ADBAA800DF9FB4 /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
 		24E90F9F18ADBAA800DF9FB4 /* Tag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Tag.m; sourceTree = "<group>"; };
+		C3C8B19318B6A466000B739E /* CNTextStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNTextStorage.h; sourceTree = "<group>"; };
+		C3C8B19418B6A466000B739E /* CNTextStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNTextStorage.m; sourceTree = "<group>"; };
 		C3EEDB2418AD5E30003CC23D /* CocoaNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CocoaNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3EEDB2718AD5E30003CC23D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C3EEDB2918AD5E30003CC23D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -73,8 +74,6 @@
 		C3EEDB3718AD5E30003CC23D /* CocoaNotes-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CocoaNotes-Prefix.pch"; sourceTree = "<group>"; };
 		C3EEDB3818AD5E30003CC23D /* CNAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CNAppDelegate.h; sourceTree = "<group>"; };
 		C3EEDB3918AD5E30003CC23D /* CNAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CNAppDelegate.m; sourceTree = "<group>"; };
-		C3EEDB3C18AD5E30003CC23D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
-		C3EEDB3F18AD5E30003CC23D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
 		C3EEDB4218AD5E30003CC23D /* CocoaNotes.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CocoaNotes.xcdatamodel; sourceTree = "<group>"; };
 		C3EEDB4418AD5E30003CC23D /* CNMasterViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CNMasterViewController.h; sourceTree = "<group>"; };
 		C3EEDB4518AD5E30003CC23D /* CNMasterViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CNMasterViewController.m; sourceTree = "<group>"; };
@@ -133,8 +132,6 @@
 			children = (
 				24E90F9818ADB29F00DF9FB4 /* CNTextView.h */,
 				24E90F9918ADB29F00DF9FB4 /* CNTextView.m */,
-				C3EEDB3B18AD5E30003CC23D /* Main_iPhone.storyboard */,
-				C3EEDB3E18AD5E30003CC23D /* Main_iPad.storyboard */,
 				24D2DCCB18B1CC9A000E73DD /* CNSuggestionViewController.h */,
 				24D2DCCC18B1CC9A000E73DD /* CNSuggestionViewController.m */,
 			);
@@ -201,6 +198,8 @@
 				24E90FA318ADBAD800DF9FB4 /* Controllers */,
 				C3EEDB4A18AD5E30003CC23D /* Images.xcassets */,
 				C3EEDB3018AD5E30003CC23D /* Supporting Files */,
+				C3C8B19318B6A466000B739E /* CNTextStorage.h */,
+				C3C8B19418B6A466000B739E /* CNTextStorage.m */,
 			);
 			path = CocoaNotes;
 			sourceTree = "<group>";
@@ -311,10 +310,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3EEDB4018AD5E30003CC23D /* Main_iPad.storyboard in Resources */,
 				C3EEDB4B18AD5E30003CC23D /* Images.xcassets in Resources */,
 				C3EEDB6918AD5E7B003CC23D /* podfile in Resources */,
-				C3EEDB3D18AD5E30003CC23D /* Main_iPhone.storyboard in Resources */,
 				C3EEDB6B18AD5F3C003CC23D /* .gitignore in Resources */,
 				C3EEDB3418AD5E30003CC23D /* InfoPlist.strings in Resources */,
 			);
@@ -342,6 +339,7 @@
 				C3EEDB4318AD5E30003CC23D /* CocoaNotes.xcdatamodeld in Sources */,
 				24D2DCC718B07AA7000E73DD /* CocoaCheck.m in Sources */,
 				24E90FA018ADBAA800DF9FB4 /* Tag.m in Sources */,
+				C3C8B19518B6A466000B739E /* CNTextStorage.m in Sources */,
 				C3EEDB3A18AD5E30003CC23D /* CNAppDelegate.m in Sources */,
 				24D2DCCA18B07AB4000E73DD /* FoundationCheck.m in Sources */,
 				24E90F9D18ADBAA700DF9FB4 /* Note.m in Sources */,
@@ -375,22 +373,6 @@
 				C3EEDB3318AD5E30003CC23D /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		C3EEDB3B18AD5E30003CC23D /* Main_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				C3EEDB3C18AD5E30003CC23D /* Base */,
-			);
-			name = Main_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		C3EEDB3E18AD5E30003CC23D /* Main_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				C3EEDB3F18AD5E30003CC23D /* Base */,
-			);
-			name = Main_iPad.storyboard;
 			sourceTree = "<group>";
 		};
 		C3EEDB5B18AD5E30003CC23D /* InfoPlist.strings */ = {

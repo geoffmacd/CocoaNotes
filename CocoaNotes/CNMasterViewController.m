@@ -16,14 +16,6 @@
 
 @implementation CNMasterViewController
 
-- (void)awakeFromNib
-{
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        self.clearsSelectionOnViewWillAppear = NO;
-        self.preferredContentSize = CGSizeMake(320.0, 600.0);
-    }
-    [super awakeFromNib];
-}
 
 - (void)viewDidLoad
 {
@@ -34,6 +26,8 @@
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
     self.navigationItem.rightBarButtonItem = addButton;
     self.detailViewController = (CNDetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
+    
+    [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
 }
 
 - (void)didReceiveMemoryWarning
@@ -113,21 +107,18 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        NSManagedObject *object = [[self fetchedResultsController] objectAtIndexPath:indexPath];
-        self.detailViewController.detailItem = object;
-    }
+    
+    NSManagedObject *object = [[self fetchedResultsController] objectAtIndexPath:indexPath];
+    
+    CNDetailViewController * vc = [[CNDetailViewController alloc] init];
+    
+    [self.navigationController pushViewController:vc animated:YES];
+    
+    [vc setDetailItem:object];
+    [vc setContext:self.managedObjectContext];
+
 }
 
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    if ([[segue identifier] isEqualToString:@"showDetail"]) {
-        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        NSManagedObject *object = [[self fetchedResultsController] objectAtIndexPath:indexPath];
-        [[segue destinationViewController] setDetailItem:object];
-        [[segue destinationViewController] setContext:self.managedObjectContext];
-    }
-}
 
 #pragma mark - Fetched results controller
 

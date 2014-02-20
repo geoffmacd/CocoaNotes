@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CNDetailViewController.h"
 
 @class CNDetailViewController;
 

@@ -44,13 +44,16 @@
 
 - (void)configureView
 {
+    //create the text view
+    _textView = [[CNTextView alloc] initWithFrame:self.view.frame];
+    [self.view addSubview:_textView];
+    
     // Update the user interface for the detail item.
-
     if (self.detailItem) {
-        self.textView.text = [[self.detailItem valueForKey:@"text"] description];
+        _textView.text = [[self.detailItem valueForKey:@"text"] description];
     }
     
-    [self.textView setParentControl:self];
+    [_textView setParentControl:self];
 }
 
 - (void)viewDidLoad
@@ -62,7 +65,7 @@
 
 -(void)viewWillDisappear:(BOOL)animated{
     
-    [self.detailItem setValue:[self.textView text] forKey:@"text"];
+    [self.detailItem setValue:[_textView text] forKey:@"text"];
     [self.context save:nil];
 }
 
