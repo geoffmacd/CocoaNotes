@@ -11,7 +11,7 @@
 #import "CNSuggestionViewController.h"
 #import "CNTextStorage.h"
 
-#define SuggestorHeight     120
+#define kSuggestorHeight     120
 
 
 @protocol CNTextViewDelegate <NSObject>
@@ -24,17 +24,14 @@
 
 @interface CNTextView : UITextView <UITextViewDelegate,NSTextStorageDelegate,CNSuggestionViewControllerDelegate,CNTextStorageDelegate>{
     BOOL showingBox;
-    NSInteger firstIndex;
-    CGSize kbSize;
-    CGRect _oldRect;
-    NSTimer * _caretVisibilityTimer;
-    NSCharacterSet * invalidCharSet;
+    NSUInteger firstIndex;
     NSUInteger curLoc;
+    CGSize kbSize;
+    NSCharacterSet * _invalidCharSet;
     CNTextStorage * _storage;
+    NSMutableArray * _checkers;
 }
 
-@property UITapGestureRecognizer * tap;
-@property NSMutableArray * checkers;
 @property CNSuggestionViewController * suggestionBox;
 
 @property (weak) id<CNTextViewDelegate> parentControl;

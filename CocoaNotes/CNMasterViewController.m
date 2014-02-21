@@ -112,10 +112,10 @@
     
     CNDetailViewController * vc = [[CNDetailViewController alloc] init];
     
-    [self.navigationController pushViewController:vc animated:YES];
-    
     [vc setDetailItem:object];
     [vc setContext:self.managedObjectContext];
+    [self.navigationController pushViewController:vc animated:YES];
+    
 
 }
 

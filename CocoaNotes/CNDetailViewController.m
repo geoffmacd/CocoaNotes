@@ -22,10 +22,7 @@
 {
     if (_detailItem != newDetailItem) {
         _detailItem = newDetailItem;
-        
-        // Update the view.
-        [self configureView];
-    }
+    } 
 
     if (self.masterPopoverController != nil) {
         [self.masterPopoverController dismissPopoverAnimated:YES];

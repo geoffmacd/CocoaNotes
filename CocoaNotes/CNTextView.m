@@ -18,8 +18,7 @@
     self = [super initWithFrame:frame textContainer:container];
     if (self) {
         // Initialization code
-        [self config]; 
-        
+        [self config];
     }
     return self;
 }
@@ -35,13 +34,12 @@
     _storage.delegate = self;
     [_storage appendAttributedString:attrString];
     
-    // 2. Create the layout manager
+    // Create the layout manager
     NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
     
-    // 3. Create a text container
+    // Create a text container
     CGSize containerSize = CGSizeMake(frame.size.width, CGFLOAT_MAX);
     NSTextContainer *container = [[NSTextContainer alloc] initWithSize:containerSize];
-    container.widthTracksTextView = YES;
     [layoutManager addTextContainer:container];
     [_storage addLayoutManager:layoutManager];
     
@@ -51,15 +49,13 @@
 -(void)config{
     
     [self setDelegate:self];
-    
-    //nav bar
-    [self setContentInset:UIEdgeInsetsMake(64, 0, 0, 0)];
+    self.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
+    self.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
     
     _checkers = [NSMutableArray new];
     
     CocoaCheck * cocoa = [[CocoaCheck alloc] init];
     [_checkers addObject:cocoa];
-    
     FoundationCheck * found = [[FoundationCheck alloc] init];
     [_checkers addObject:found];
     
@@ -68,48 +64,41 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preferredContentSizeChanged) name:UIContentSizeCategoryDidChangeNotification object:nil];
     
-    self.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
-
-
-    self.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    //invalid characters
+    NSMutableCharacterSet * programmaticSet = [NSCharacterSet alphanumericCharacterSet];
+    NSCharacterSet * whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    whitespace = [whitespace invertedSet];
+    //form set with only alphanumeric without whitespaces
+    [programmaticSet formIntersectionWithCharacterSet:whitespace];
+    _invalidCharSet = [programmaticSet invertedSet];
 }
 
 -(void)preferredContentSizeChanged{
-    
+    //form notification
     self.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
 }
 
 -(void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIContentSizeCategoryDidChangeNotification object:nil];
 }
 
 -(void)showListView:(NSArray*)suggestions withFirstIndex:(NSInteger)first{
     
     CNSuggestionViewController * suggestor = [[CNSuggestionViewController alloc] initWithStyle:UITableViewStylePlain];
     
-    CGFloat y = self.bounds.size.height - kbSize.height - SuggestorHeight;
+    CGFloat y = self.bounds.size.height - kbSize.height - kSuggestorHeight;
     
-    [suggestor.view setFrame:CGRectMake(0, y, self.bounds.size.width, SuggestorHeight)];
+    [suggestor.view setFrame:CGRectMake(0, y, self.bounds.size.width, kSuggestorHeight)];
     [suggestor setList: suggestions];
     [suggestor setDelegate:self];
     
     
     if([self.parentControl willShowSuggestionBox:suggestor]){
         
-        UIEdgeInsets insets = self.contentInset;
-        insets.bottom += suggestor.view.frame.size.height;
-        self.contentInset = insets;
-        
-        insets = self.scrollIndicatorInsets;
-        insets.bottom += suggestor.view.frame.size.height;
-        self.scrollIndicatorInsets = insets;
-        
-        //scroll to text
-//        NSRange range;
-//        range.location = first;
-//        range.length = 0;
-//        [self scrollRangeToVisible:range];
+        //include suggestion box
+        [self setContentInset:UIEdgeInsetsMake(64, 0, kbSize.height + kSuggestorHeight, 0)];
         
         _suggestionBox = suggestor;
         firstIndex = first;
@@ -119,13 +108,10 @@
 
 -(void)removeListView{
     
-    UIEdgeInsets insets = self.contentInset;
-    insets.bottom -= _suggestionBox.view.frame.size.height;
-    self.contentInset = insets;
+    //reset
+    [self setContentInset:UIEdgeInsetsMake(64, 0, kbSize.height, 0)];
     
-    insets = self.scrollIndicatorInsets;
-    insets.bottom -= _suggestionBox.view.frame.size.height;
-    self.scrollIndicatorInsets = insets;
+    [self enableAutoComplete];
     
     [self.parentControl willRemoveSuggestionBox:_suggestionBox];
     showingBox = NO;
@@ -170,21 +156,18 @@
 }
 
 -(void)disableAutoComplete{
-    
-//    NSRange rangeCopy = self.selectedRange;
-//    NSString *textCopy = self.text.copy;
-//    [self resignFirstResponder];
-//    [self becomeFirstResponder];
-//    [self setText:textCopy];
-//    [self setSelectedRange:rangeCopy];
-    
+    [self setAutocorrectionType:UITextAutocorrectionTypeNo];
+}
+
+-(void)enableAutoComplete{
+    [self setAutocorrectionType:UITextAutocorrectionTypeDefault];
 }
 
 -(BOOL)continueSuggestions:(NSString*)recentWord{
     
     //determine whether suggestion box should still be displayed
     
-    if([recentWord length] >  2){
+    if([recentWord length] >=  2){
         
         __block NSMutableArray * list = [NSMutableArray new];
         [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
@@ -216,12 +199,10 @@
     
     //use suggestions
     NSArray * suggestions = [self.suggestionBox list];
-    
     if([suggestions count] == 0)
         return nil;
-    else{
+    else    //first one
         return suggestions[0];
-    }
 }
 
 -(void)replaceWordInTextView:(NSString*)replacement{
@@ -236,7 +217,6 @@
     [allText insertString:replacement atIndex:firstIndex];
     //replace textview text
     self.text = [NSString stringWithString:allText];
-
 }
 
 -(BOOL)shouldHighlight:(NSString*)word{
@@ -261,15 +241,6 @@
  */
 -(NSString*)mostRecentWord:(NSString*)allText atLocation:(NSInteger)location{
     
-    if(!invalidCharSet){
-        NSMutableCharacterSet * programmaticSet = [NSCharacterSet alphanumericCharacterSet];
-        NSCharacterSet * whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-        whitespace = [whitespace invertedSet];
-        //form set with only alphanumeric without whitespaces
-        [programmaticSet formIntersectionWithCharacterSet:whitespace];
-        invalidCharSet = [programmaticSet invertedSet];
-    }
-    
     NSRange s,r;
     s.length = 0;
     s.location = location;
@@ -281,7 +252,7 @@
         //get newly constructed string
         NSString * constructed = [allText substringWithRange:s];
         //looking for first range of nonvalid characters
-        r = [constructed rangeOfCharacterFromSet:invalidCharSet options:NSBackwardsSearch];
+        r = [constructed rangeOfCharacterFromSet:_invalidCharSet options:NSBackwardsSearch];
         //while the chracter is valid and string has enough length
     } while (s.location > 0 && r.location == NSNotFound);
     
@@ -317,46 +288,41 @@
     
     //determine potential for correction
     if([text length] == 1){
-        //adding character
+        //adding charactern
         
         //add the next letter
         [replacedText insertString:text atIndex:range.location];
         range.location++;
     } else if ([text length] > 1){
+        //do not autocorrect
         if(showingBox)
             return NO;
     }
     else {
         //backspaced
-        
         //remove last letter
         [replacedText deleteCharactersInRange:range];
     }
     NSString* recentWord = [self mostRecentWord:replacedText atLocation:range.location];
         
     if(showingBox){
-        
         curLoc = range.location;
         
         if(recentWord){
-        
             //pass changes to suggestion box
             [self continueSuggestions:recentWord];
-        } else if([text rangeOfCharacterFromSet:invalidCharSet options:NSAnchoredSearch].location != NSNotFound) {
+        } else {
             //user pressed space or enter after completing word, now replace with caps
             //chop off space
             range.location--;
             recentWord = [self mostRecentWord:replacedText atLocation:range.location];
             NSString * replaceStr = [self replaceUserEnteredWord:recentWord];
             if(replaceStr && [replaceStr length] - [recentWord length] < 5) {
-                
                 [self replaceWordInTextView:replaceStr];
-                
-                //remove list
-                [self removeListView];
             }
+            //remove list
+            [self removeListView];
         }
-        [self disableAutoComplete];
     } else{
         if([recentWord length] >= 2){
             if([self shouldAutoComplete:recentWord]){
@@ -375,10 +341,21 @@
     return YES;
 }
 
--(void)textViewDidChangeSelection:(UITextView *)textView{
-    //scroll to selected
-    NSRange range = textView.selectedRange;
-    [textView scrollRangeToVisible:range];
+-(void)textViewDidChange:(UITextView *)textView{
+    
+    //adjust position of scrollview
+    CGRect line = [textView caretRectForPosition: textView.selectedTextRange.start];
+    CGFloat overflow = line.origin.y + line.size.height - ( textView.contentOffset.y + textView.bounds.size.height - textView.contentInset.bottom - textView.contentInset.top );
+    if ( overflow > 0 ) {
+        // We are at the bottom of the visible text and introduced a line feed, scroll down (iOS 7 does not do it)
+        // Scroll caret to visible area
+        CGPoint offset = textView.contentOffset;
+        offset.y += overflow + 7; // leave 7 pixels margin
+        // Cannot animate with setContentOffset:animated: or caret will not appear
+        [UIView animateWithDuration:.2 animations:^{
+            [textView setContentOffset:offset];
+        }];
+    }
 }
 
 #pragma CNSuggestionViewControllerDelegate
@@ -397,45 +374,23 @@
 -(void)didShowKeyboard:(NSNotification*)notify{
     
     kbSize = [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-    
-    CGRect frame = self.frame;
-    frame.size.height -= [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
-    [self setFrame:frame];
-    
-//    UIEdgeInsets insets = self.contentInset;
-//    insets.bottom += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
-//    self.contentInset = insets;
-    
-//    insets = self.scrollIndicatorInsets;
-//    insets.bottom += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
-//    self.scrollIndicatorInsets = insets;
+    //adjust for keyboard
+    [self setContentInset:UIEdgeInsetsMake(64, 0, kbSize.height, 0)];
 }
 
 -(void)willHideKeyboard:(NSNotification*)notify{
     
     kbSize = CGSizeZero;
-    
-    if(showingBox){
+    if(showingBox)
         [self removeListView];
-    }
-    
-    CGRect frame = self.frame;
-    frame.size.height += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
-    [self setFrame:frame];
-    
-//    UIEdgeInsets insets = self.contentInset;
-//    insets.bottom -= [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size.height;
-//    self.contentInset = insets;
-    
-//    insets = self.scrollIndicatorInsets;
-//    insets.bottom -= [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size.height;
-//    self.scrollIndicatorInsets = insets;
+    //reset
+    [self setContentInset:UIEdgeInsetsMake(64, 0, 0, 0)];
 }
 
 #pragma CNTextStorageDelegate
 
 -(void)processEditingForAttributes{
-    
+    //highlight syntax
     NSString * allText = _storage.string;
     NSRange r = {0, [allText length]};
     
@@ -449,9 +404,6 @@
         else    //need to remove else text attributes are scrambled
             [_storage removeAttribute:NSForegroundColorAttributeName range:tokenRange];
     }];
-    
 }
-
-
 
 @end
