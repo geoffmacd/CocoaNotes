@@ -108,9 +108,6 @@
 
 -(void)removeListView{
     
-    //reset
-    [self setContentInset:UIEdgeInsetsMake(64, 0, kbSize.height, 0)];
-    
     [self enableAutoComplete];
     
     [self.parentControl willRemoveSuggestionBox:_suggestionBox];
@@ -118,6 +115,30 @@
     firstIndex = -1;
     _suggestionBox = nil;
     curLoc = 0;
+    
+    //reset
+    [UIView animateWithDuration:0.6 animations:^{
+        [self setContentInset:UIEdgeInsetsMake(64, 0, kbSize.height, 0)];
+    }];
+    
+    //scroll to text selection
+    double delayInSeconds = 0.0;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        
+        //adjust position of scrollview
+        CGRect line = [self caretRectForPosition: self.selectedTextRange.start];
+        CGFloat overflow = line.origin.y + line.size.height - ( self.contentOffset.y + self.bounds.size.height - self.contentInset.bottom - self.contentInset.top );
+        if ( overflow > 0 ) {
+            // We are at the bottom of the visible text and introduced a line feed, scroll down (iOS 7 does not do it)
+            // Scroll caret to visible area
+            CGPoint offset = self.contentOffset;
+            offset.y += overflow + 7; // leave 7 pixels margin
+            // Cannot animate with setContentOffset:animated: or caret will not appear
+            [self setContentOffset:offset];
+
+        }
+    });
 }
 
 -(BOOL)shouldAutoComplete:(NSString*)word{
@@ -385,6 +406,10 @@
         [self removeListView];
     //reset
     [self setContentInset:UIEdgeInsetsMake(64, 0, 0, 0)];
+    
+    //scroll to text selection
+    NSRange r =self.selectedRange;
+    [self scrollRangeToVisible:r];
 }
 
 #pragma CNTextStorageDelegate

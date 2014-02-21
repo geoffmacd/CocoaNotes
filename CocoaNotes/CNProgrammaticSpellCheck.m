@@ -42,11 +42,9 @@
             if([shortenedClass isEqualToString:word])
                 [methods addObject:obj];
         }
-        
     }];
     
     return methods;
-    
 }
 
 -(BOOL)isExactClass:(NSString*)word{
