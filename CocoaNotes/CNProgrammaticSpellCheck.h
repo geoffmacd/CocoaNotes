@@ -21,5 +21,6 @@
 -(instancetype)init;
 -(BOOL)isPotential:(NSString*)word;
 -(NSArray*)listClasses:(NSString*)word;
+-(BOOL)isExactClass:(NSString*)word;
 
 @end

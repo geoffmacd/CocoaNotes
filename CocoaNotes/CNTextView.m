@@ -249,7 +249,6 @@
     else{
         return suggestions[0];
     }
-    
 }
 
 -(void)replaceWordInTextView:(NSString*)replacement{
@@ -265,6 +264,20 @@
     //replace textview text
     self.text = [NSString stringWithString:allText];
 
+}
+
+-(BOOL)shouldHighlight:(NSString*)word{
+    
+    __block BOOL found = NO;
+    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        CNProgrammaticSpellCheck * checker = obj;
+        if([checker isExactClass:word]){
+            found = YES;
+            *stop = YES;
+        }
+    }];
+    return found;
 }
 
 /**
@@ -471,10 +484,19 @@
 -(void)processEditingForAttributes{
     
     NSString * allText = _storage.string;
+    NSRange r = {0, [allText length]};
     
-    NSRange r = {0, [allText length]/2};
+    [allText enumerateLinguisticTagsInRange:r scheme:NSLinguisticTagSchemeTokenType options:NSLinguisticTaggerOmitWhitespace|NSLinguisticTaggerOmitPunctuation orthography:Nil usingBlock:^(NSString *tag, NSRange tokenRange, NSRange sentenceRange, BOOL *stop) {
+        
+        
+        NSString * word = [allText substringWithRange:tokenRange];
+        
+        if([self shouldHighlight:word])
+            [_storage addAttribute:NSForegroundColorAttributeName value:[UIColor redColor] range:tokenRange];
+        else
+            [_storage removeAttribute:NSForegroundColorAttributeName range:tokenRange];
+    }];
     
-    [_storage addAttribute:NSFontAttributeName value:[UIColor yellowColor] range:r];
 }
 
 

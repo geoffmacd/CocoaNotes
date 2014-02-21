@@ -49,4 +49,11 @@
     
 }
 
+-(BOOL)isExactClass:(NSString*)word{
+
+    NSUInteger index = [_classNames indexOfObject:word];
+    
+    return (index != NSNotFound);
+}
+
 @end
