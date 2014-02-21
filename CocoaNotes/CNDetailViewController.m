@@ -43,6 +43,7 @@
 {
     //create the text view
     _textView = [[CNTextView alloc] initWithFrame:self.view.frame];
+    _textView.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:_textView];
     
     // Update the user interface for the detail item.

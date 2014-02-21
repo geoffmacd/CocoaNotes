@@ -22,5 +22,7 @@
 -(BOOL)isPotential:(NSString*)word;
 -(NSArray*)listClasses:(NSString*)word;
 -(BOOL)isExactClass:(NSString*)word;
+-(NSArray*)listMethods:(NSString*)word;
+-(BOOL)isExactMethod:(NSString*)word;
 
 @end

@@ -163,10 +163,12 @@
     [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
         CNProgrammaticSpellCheck * checker = obj;
-        NSArray * added =[checker listClasses:word];
-        if([added count]){
+        NSArray * clas =[checker listClasses:word];
+        NSArray * meth =[checker listMethods:word];
+        if([clas count] || [meth count]){
             NSLog(@"found suggestions");
-            [list addObjectsFromArray:added];
+            [list addObjectsFromArray:clas];
+            [list addObjectsFromArray:meth];
         }
     }];
     
@@ -194,10 +196,12 @@
         [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             
             CNProgrammaticSpellCheck * checker = obj;
-            NSArray * added =[checker listClasses:recentWord];
-            if([added count]){
+            NSArray * clas =[checker listClasses:recentWord];
+            NSArray * meth =[checker listMethods:recentWord];
+            if([clas count] || [meth count]){
                 NSLog(@"found suggestions");
-                [list addObjectsFromArray:added];
+                [list addObjectsFromArray:clas];
+                [list addObjectsFromArray:meth];
             }
         }];
         

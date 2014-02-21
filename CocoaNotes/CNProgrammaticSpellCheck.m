@@ -28,7 +28,8 @@
     if([word length] > 1){
         //return is at least one
         NSArray * l = [self listClasses:[word lowercaseString]];
-        return ([l count]);
+        NSArray * m = [self listMethods:[word lowercaseString]];
+        return ([l count] || [m count]);
     }
     return NO;
 }
@@ -50,6 +51,27 @@
 -(BOOL)isExactClass:(NSString*)word{
 
     NSUInteger index = [_classNames indexOfObject:word];
+    
+    return (index != NSNotFound);
+}
+
+-(NSArray*)listMethods:(NSString*)word{
+    
+    NSMutableArray * methods = [NSMutableArray new];
+    [_methodNames enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if([obj length] >= [word length]){
+            NSString * shortenedMethod = [[obj substringToIndex:[word length]] lowercaseString];
+            if([shortenedMethod isEqualToString:word])
+                [methods addObject:obj];
+        }
+    }];
+    
+    return methods;
+}
+
+-(BOOL)isExactMethod:(NSString*)word{
+    
+    NSUInteger index = [_methodNames indexOfObject:word];
     
     return (index != NSNotFound);
 }
