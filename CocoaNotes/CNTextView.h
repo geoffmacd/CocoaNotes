@@ -11,6 +11,8 @@
 #import "CNSuggestionViewController.h"
 #import "CNTextStorage.h"
 
+#define SuggestorHeight     120
+
 
 @protocol CNTextViewDelegate <NSObject>
 

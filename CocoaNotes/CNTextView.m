@@ -84,40 +84,13 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidHideNotification object:nil];
 }
 
-- (void)drawRect:(CGRect)rect {
-    //draw original textview
-    [super drawRect:rect];
-    
-//    //draw notepad
-//    CGContextRef context = UIGraphicsGetCurrentContext();
-//    CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:0.8 alpha:0.5].CGColor);
-//    
-//    // Draw them with a 0.5 stroke width so they are a bit more visible.
-//    CGContextSetLineWidth(context, 0.5);
-//    
-//    CGFloat lineHeight = self.font.lineHeight;
-//    CGFloat y = lineHeight / 2;
-//    
-//    for(NSInteger i = 0; i < 600.0 /lineHeight; i ++){
-//        
-//        CGContextMoveToPoint(context, 0,y); //start at this point
-//        
-//        CGContextAddLineToPoint(context, 320, y); //draw to this point
-//        
-//        // and now draw the Path!
-//        CGContextStrokePath(context);
-//        
-//        y += lineHeight;
-//    }
-}
-
 -(void)showListView:(NSArray*)suggestions withFirstIndex:(NSInteger)first{
     
     CNSuggestionViewController * suggestor = [[CNSuggestionViewController alloc] initWithStyle:UITableViewStylePlain];
     
-    CGFloat y = self.bounds.size.height - kbSize.height - 200;
+    CGFloat y = self.bounds.size.height - kbSize.height - SuggestorHeight;
     
-    [suggestor.view setFrame:CGRectMake(0, y, self.bounds.size.width, 200)];
+    [suggestor.view setFrame:CGRectMake(0, y, self.bounds.size.width, SuggestorHeight)];
     [suggestor setList: suggestions];
     [suggestor setDelegate:self];
     
@@ -125,18 +98,18 @@
     if([self.parentControl willShowSuggestionBox:suggestor]){
         
         UIEdgeInsets insets = self.contentInset;
-        insets.bottom += _suggestionBox.view.frame.size.height;
+        insets.bottom += suggestor.view.frame.size.height;
         self.contentInset = insets;
         
         insets = self.scrollIndicatorInsets;
-        insets.bottom += _suggestionBox.view.frame.size.height;
+        insets.bottom += suggestor.view.frame.size.height;
         self.scrollIndicatorInsets = insets;
         
         //scroll to text
-        NSRange range;
-        range.location = first;
-        range.length = 0;
-        [self scrollRangeToVisible:range];
+//        NSRange range;
+//        range.location = first;
+//        range.length = 0;
+//        [self scrollRangeToVisible:range];
         
         _suggestionBox = suggestor;
         firstIndex = first;
@@ -198,12 +171,12 @@
 
 -(void)disableAutoComplete{
     
-    NSRange rangeCopy = self.selectedRange;
-    NSString *textCopy = self.text.copy;
-    [self resignFirstResponder];
-    [self becomeFirstResponder];
-    [self setText:textCopy];
-    [self setSelectedRange:rangeCopy];
+//    NSRange rangeCopy = self.selectedRange;
+//    NSString *textCopy = self.text.copy;
+//    [self resignFirstResponder];
+//    [self becomeFirstResponder];
+//    [self setText:textCopy];
+//    [self setSelectedRange:rangeCopy];
     
 }
 
@@ -343,13 +316,17 @@
     NSMutableString * replacedText = [NSMutableString stringWithString:[textView text]];
     
     //determine potential for correction
-    if([text length]){
+    if([text length] == 1){
         //adding character
         
         //add the next letter
         [replacedText insertString:text atIndex:range.location];
         range.location++;
-    }else {
+    } else if ([text length] > 1){
+        if(showingBox)
+            return NO;
+    }
+    else {
         //backspaced
         
         //remove last letter
@@ -365,13 +342,13 @@
         
             //pass changes to suggestion box
             [self continueSuggestions:recentWord];
-        } else if([text isEqualToString:@" "]) {
-            //user pressed space after completing word, now replace with caps
+        } else if([text rangeOfCharacterFromSet:invalidCharSet options:NSAnchoredSearch].location != NSNotFound) {
+            //user pressed space or enter after completing word, now replace with caps
             //chop off space
             range.location--;
             recentWord = [self mostRecentWord:replacedText atLocation:range.location];
             NSString * replaceStr = [self replaceUserEnteredWord:recentWord];
-            if(replaceStr) {
+            if(replaceStr && [replaceStr length] - [recentWord length] < 5) {
                 
                 [self replaceWordInTextView:replaceStr];
                 
@@ -389,6 +366,7 @@
                 //disable
                 [self disableAutoComplete];
                 ///show suggestion box
+                curLoc = range.location;
                 [self showAutoComplete:recentWord withStartIndex:range.location - [recentWord length]];
             }
         }
@@ -397,21 +375,10 @@
     return YES;
 }
 
-- (void)textViewDidBeginEditing:(UITextView *)textView
-{
-    _oldRect = [self caretRectForPosition:self.selectedTextRange.end];
-    
-    _caretVisibilityTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(_scrollCaretToVisible) userInfo:nil repeats:YES];
-}
-
-- (void)textViewDidEndEditing:(UITextView *)textView
-{
-    [_caretVisibilityTimer invalidate];
-    _caretVisibilityTimer = nil;
-}
-
 -(void)textViewDidChangeSelection:(UITextView *)textView{
-    
+    //scroll to selected
+    NSRange range = textView.selectedRange;
+    [textView scrollRangeToVisible:range];
 }
 
 #pragma CNSuggestionViewControllerDelegate
@@ -431,52 +398,38 @@
     
     kbSize = [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     
-    UIEdgeInsets insets = self.contentInset;
-    insets.bottom += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
-    self.contentInset = insets;
+    CGRect frame = self.frame;
+    frame.size.height -= [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+    [self setFrame:frame];
     
-    insets = self.scrollIndicatorInsets;
-    insets.bottom += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
-    self.scrollIndicatorInsets = insets;
+//    UIEdgeInsets insets = self.contentInset;
+//    insets.bottom += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+//    self.contentInset = insets;
+    
+//    insets = self.scrollIndicatorInsets;
+//    insets.bottom += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+//    self.scrollIndicatorInsets = insets;
 }
 
 -(void)willHideKeyboard:(NSNotification*)notify{
     
     kbSize = CGSizeZero;
     
-    UIEdgeInsets insets = self.contentInset;
-    insets.bottom -= [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size.height;
-    self.contentInset = insets;
-    
-    insets = self.scrollIndicatorInsets;
-    insets.bottom -= [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size.height;
-    self.scrollIndicatorInsets = insets;
-}
-
-- (void)_scrollCaretToVisible
-{
-    //This is where the cursor is at.
-    CGRect caretRect = [self caretRectForPosition:self.selectedTextRange.end];
-    
-    if(CGRectEqualToRect(caretRect, _oldRect))
-        return;
-    
-    _oldRect = caretRect;
-    
-    //This is the visible rect of the textview.
-    CGRect visibleRect = self.bounds;
-    visibleRect.size.height -= (self.contentInset.top + self.contentInset.bottom);
-    visibleRect.origin.y = self.contentOffset.y;
-    
-    //We will scroll only if the caret falls outside of the visible rect.
-    if(!CGRectContainsRect(visibleRect, caretRect))
-    {
-        CGPoint newOffset = self.contentOffset;
-        
-        newOffset.y = MAX((caretRect.origin.y + caretRect.size.height) - visibleRect.size.height + 5, 0);
-        
-        [self setContentOffset:newOffset animated:YES];
+    if(showingBox){
+        [self removeListView];
     }
+    
+    CGRect frame = self.frame;
+    frame.size.height += [notify.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+    [self setFrame:frame];
+    
+//    UIEdgeInsets insets = self.contentInset;
+//    insets.bottom -= [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size.height;
+//    self.contentInset = insets;
+    
+//    insets = self.scrollIndicatorInsets;
+//    insets.bottom -= [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size.height;
+//    self.scrollIndicatorInsets = insets;
 }
 
 #pragma CNTextStorageDelegate
@@ -486,14 +439,14 @@
     NSString * allText = _storage.string;
     NSRange r = {0, [allText length]};
     
+    //enumerate all possible programmatic words and apply highlight where applicable
     [allText enumerateLinguisticTagsInRange:r scheme:NSLinguisticTagSchemeTokenType options:NSLinguisticTaggerOmitWhitespace|NSLinguisticTaggerOmitPunctuation orthography:Nil usingBlock:^(NSString *tag, NSRange tokenRange, NSRange sentenceRange, BOOL *stop) {
-        
         
         NSString * word = [allText substringWithRange:tokenRange];
         
         if([self shouldHighlight:word])
             [_storage addAttribute:NSForegroundColorAttributeName value:[UIColor redColor] range:tokenRange];
-        else
+        else    //need to remove else text attributes are scrambled
             [_storage removeAttribute:NSForegroundColorAttributeName range:tokenRange];
     }];
     

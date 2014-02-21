@@ -26,7 +26,7 @@
 }
 
 - (void)replaceCharactersInRange:(NSRange)range withString:(NSString *)str{
-    NSLog(@"replaceCharactersInRange:%@ withString:%@", NSStringFromRange(range), str);
+//    NSLog(@"replaceCharactersInRange:%@ withString:%@", NSStringFromRange(range), str);
     
     [self beginEditing];
     [_backingStore replaceCharactersInRange:range withString:str];
@@ -35,7 +35,7 @@
 }
 
 - (void)setAttributes:(NSDictionary *)attrs range:(NSRange)range{
-    NSLog(@"setAttributes:%@ range:%@", attrs, NSStringFromRange(range));
+//    NSLog(@"setAttributes:%@ range:%@", attrs, NSStringFromRange(range));
     
     [self beginEditing];
     [_backingStore setAttributes:attrs range:range];
