@@ -1,1 +1,10 @@
+PODS:
+  - JTSCursorMovement (1.0.0)
+
+DEPENDENCIES:
+  - JTSCursorMovement
+
+SPEC CHECKSUMS:
+  JTSCursorMovement: cfdb079b6f39c3739c22d6c436d3030c3153891c
+
 COCOAPODS: 0.29.0

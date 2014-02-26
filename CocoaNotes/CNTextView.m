@@ -67,9 +67,11 @@
     //invalid characters
     NSMutableCharacterSet * programmaticSet = [NSCharacterSet alphanumericCharacterSet];
     NSCharacterSet * whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    NSCharacterSet * methodSet = [NSCharacterSet characterSetWithCharactersInString:@"-+"];
     whitespace = [whitespace invertedSet];
     //form set with only alphanumeric without whitespaces
     [programmaticSet formIntersectionWithCharacterSet:whitespace];
+    [programmaticSet formIntersectionWithCharacterSet:methodSet];
     _invalidCharSet = [programmaticSet invertedSet];
 }
 
@@ -84,14 +86,14 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIContentSizeCategoryDidChangeNotification object:nil];
 }
 
--(void)showListView:(NSArray*)suggestions withFirstIndex:(NSInteger)first{
+-(void)showListView:(NSDictionary*)suggestions withFirstIndex:(NSInteger)first{
     
-    CNSuggestionViewController * suggestor = [[CNSuggestionViewController alloc] initWithStyle:UITableViewStylePlain];
+    CNSuggestionViewController * suggestor = [[CNSuggestionViewController alloc] initWithStyle:UITableViewStyleGrouped];
     
     CGFloat y = self.bounds.size.height - kbSize.height - kSuggestorHeight;
     
     [suggestor.view setFrame:CGRectMake(0, y, self.bounds.size.width, kSuggestorHeight)];
-    [suggestor setList: suggestions];
+    [suggestor setDict: suggestions];
     [suggestor setDelegate:self];
     
     
@@ -159,22 +161,24 @@
 
 -(void)showAutoComplete:(NSString*)word withStartIndex:(NSInteger)index{
     
-    __block NSMutableArray * list = [NSMutableArray new];
+    __block NSMutableDictionary * dict = [NSMutableDictionary new];
     [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
         CNProgrammaticSpellCheck * checker = obj;
-        NSArray * clas =[checker listClasses:word];
+        NSArray * clas =[checker listClasses:word   ];
         NSArray * meth =[checker listMethods:word];
         if([clas count] || [meth count]){
             NSLog(@"found suggestions");
-            [list addObjectsFromArray:clas];
-            [list addObjectsFromArray:meth];
+            if([clas count])
+                dict[kClasses] = clas;
+            if([meth count])
+                dict[kMethods] = meth;
         }
     }];
     
     //decide to display suggestion box
-    if([list count]){
-        [self showListView:list withFirstIndex:index];
+    if([dict count]){
+        [self showListView:dict withFirstIndex:index];
     }
 }
 
@@ -192,22 +196,21 @@
     
     if([recentWord length] >=  2){
         
-        __block NSMutableArray * list = [NSMutableArray new];
+        __block NSMutableDictionary * dict = [NSMutableDictionary new];
         [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             
             CNProgrammaticSpellCheck * checker = obj;
             NSArray * clas =[checker listClasses:recentWord];
             NSArray * meth =[checker listMethods:recentWord];
-            if([clas count] || [meth count]){
-                NSLog(@"found suggestions");
-                [list addObjectsFromArray:clas];
-                [list addObjectsFromArray:meth];
-            }
+            if([clas count])
+                dict[kClasses] = clas;
+            if([meth count])
+                dict[kMethods] = meth;
         }];
         
-        if([list count]){
+        if([dict count]){
             //update words
-            [self.suggestionBox setList:list];
+            [self.suggestionBox setDict:dict];
             return YES;
         } else {
             //remove suggestion box
@@ -223,11 +226,18 @@
 -(NSString*)replaceUserEnteredWord:(NSString*)userWord{
     
     //use suggestions
-    NSArray * suggestions = [self.suggestionBox list];
+    NSDictionary * suggestions = [self.suggestionBox dict];
     if([suggestions count] == 0)
         return nil;
-    else    //first one
-        return suggestions[0];
+    else {   //first one
+        
+        NSString * first = [suggestions[kClasses] firstObject];
+        if(!first){
+            first = [suggestions[kMethods] firstObject];
+        }
+        
+        return first;
+    }
 }
 
 -(void)replaceWordInTextView:(NSString*)replacement{
@@ -281,7 +291,7 @@
         //while the chracter is valid and string has enough length
     } while (s.location > 0 && r.location == NSNotFound);
     
-    
+    //increment from failed lookup
     if(r.location != NSNotFound){
         s.location++;
         s.length--;
@@ -300,36 +310,30 @@
 
 #pragma UITextViewDelegate
 
--(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
+-(void)textViewDidChange:(UITextView *)textView{
+    
+    //adjust position of scrollview
+    CGRect line = [textView caretRectForPosition: textView.selectedTextRange.start];
+    CGFloat overflow = line.origin.y + line.size.height - ( textView.contentOffset.y + textView.bounds.size.height - textView.contentInset.bottom - textView.contentInset.top );
+    if ( overflow > 0 ) {
+        // We are at the bottom of the visible text and introduced a line feed, scroll down (iOS 7 does not do it)
+        // Scroll caret to visible area
+        CGPoint offset = textView.contentOffset;
+        offset.y += overflow + 7; // leave 7 pixels margin
+        // Cannot animate with setContentOffset:animated: or caret will not appear
+        [UIView animateWithDuration:.2 animations:^{
+            [textView setContentOffset:offset];
+        }];
+    }
+}
 
-    //determine if last two letters denote a possible class
-    NSLog(@"replacement text: %@    at location: %d  with length: %d",text, range.location, range.length);
+-(void)textViewDidChangeSelection:(UITextView *)textView{
     
-    //return immediately if not applicable
-    if(range.location == 0)
-        return YES;
+    NSRange range = textView.selectedRange;
+    NSString * upToLocText = [textView.text substringToIndex:range.location];
+
+    NSString* recentWord = [self mostRecentWord:upToLocText atLocation:range.location];
     
-    NSMutableString * replacedText = [NSMutableString stringWithString:[textView text]];
-    
-    //determine potential for correction
-    if([text length] == 1){
-        //adding charactern
-        
-        //add the next letter
-        [replacedText insertString:text atIndex:range.location];
-        range.location++;
-    } else if ([text length] > 1){
-        //do not autocorrect
-        if(showingBox)
-            return NO;
-    }
-    else {
-        //backspaced
-        //remove last letter
-        [replacedText deleteCharactersInRange:range];
-    }
-    NSString* recentWord = [self mostRecentWord:replacedText atLocation:range.location];
-        
     if(showingBox){
         curLoc = range.location;
         
@@ -337,14 +341,6 @@
             //pass changes to suggestion box
             [self continueSuggestions:recentWord];
         } else {
-            //user pressed space or enter after completing word, now replace with caps
-            //chop off space
-            range.location--;
-            recentWord = [self mostRecentWord:replacedText atLocation:range.location];
-            NSString * replaceStr = [self replaceUserEnteredWord:recentWord];
-            if(replaceStr && [replaceStr length] - [recentWord length] < 5) {
-                [self replaceWordInTextView:replaceStr];
-            }
             //remove list
             [self removeListView];
         }
@@ -361,25 +357,6 @@
                 [self showAutoComplete:recentWord withStartIndex:range.location - [recentWord length]];
             }
         }
-    }
-    //continue with replacements
-    return YES;
-}
-
--(void)textViewDidChange:(UITextView *)textView{
-    
-    //adjust position of scrollview
-    CGRect line = [textView caretRectForPosition: textView.selectedTextRange.start];
-    CGFloat overflow = line.origin.y + line.size.height - ( textView.contentOffset.y + textView.bounds.size.height - textView.contentInset.bottom - textView.contentInset.top );
-    if ( overflow > 0 ) {
-        // We are at the bottom of the visible text and introduced a line feed, scroll down (iOS 7 does not do it)
-        // Scroll caret to visible area
-        CGPoint offset = textView.contentOffset;
-        offset.y += overflow + 7; // leave 7 pixels margin
-        // Cannot animate with setContentOffset:animated: or caret will not appear
-        [UIView animateWithDuration:.2 animations:^{
-            [textView setContentOffset:offset];
-        }];
     }
 }
 

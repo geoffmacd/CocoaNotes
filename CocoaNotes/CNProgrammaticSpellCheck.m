@@ -28,8 +28,22 @@
     if([word length] > 1){
         //return is at least one
         NSArray * l = [self listClasses:[word lowercaseString]];
+        return ([l count] || [self isPotentialMethod:[word lowercaseString]]);
+    }
+    return NO;
+}
+
+-(BOOL)isPotentialMethod:(NSString*)word{
+    
+    unichar plus = '+';
+    unichar minus = '-';
+    
+    unichar first = [word characterAtIndex:0];
+    
+    if(first == plus || first == minus){
         NSArray * m = [self listMethods:[word lowercaseString]];
-        return ([l count] || [m count]);
+        if([m count])
+            return YES;
     }
     return NO;
 }

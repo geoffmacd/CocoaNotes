@@ -22,7 +22,7 @@ static NSString *CellIdentifier = @"Cell";
     if (self) {
         // Custom initialization
         [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CellIdentifier];
-        [self.tableView setBackgroundColor:[UIColor darkGrayColor]];
+        _order = [NSMutableArray new];
     }
     return self;
 }
@@ -43,19 +43,24 @@ static NSString *CellIdentifier = @"Cell";
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     //list methods, classes, etc seperately
-    return 1;
+    return [_dict count];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [_list count];
+    NSString * key = _order[section];
+    
+    return [_dict[key] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
-    [cell.textLabel setText:_list[[indexPath row]]];
+    NSString * key = _order[[indexPath section]];
+    NSArray * array = _dict[key];
+    NSString * word = array[[indexPath row]];
+    [cell.textLabel setText:word];
     [cell setBackgroundColor:[UIColor darkGrayColor]];
     [cell.textLabel setTextColor:[UIColor whiteColor]];
     
@@ -64,13 +69,34 @@ static NSString *CellIdentifier = @"Cell";
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     
-    NSString * word = _list[[indexPath row]];
+    NSString * key = _order[[indexPath section]];
+    NSArray * array = _dict[key];
+    NSString * word = array[[indexPath row]];
     [self.delegate didSelectWord:word];
 }
 
--(void)setList:(NSArray *)list{
+-(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
     
-    _list = list;
+    NSString * key = _order[section];
+    return key;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 25;
+}
+
+
+-(void)setDict:(NSDictionary *)dict{
+    
+    _dict = dict;
+    
+    [_order removeAllObjects];
+    
+    if(_dict[kClasses])
+        [_order addObject:kClasses];
+    if(_dict[kMethods])
+        [_order addObject:kMethods];
+    
     
     [self.tableView reloadData];
 }

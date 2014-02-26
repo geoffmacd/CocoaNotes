@@ -8,6 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
+#define kMethods    @"methods"
+#define kClasses    @"classes"
+
 @interface CNProgrammaticSpellCheck : NSObject
 
 
