@@ -57,6 +57,8 @@ static NSArray * a;
     //sort by name
     [self addToSpellCheck:[classArray sortedArrayUsingSelector:@selector(compare:)]];
     
+    self.checkerName = @"Cocoa Classes";
+    
 }
 
 @end

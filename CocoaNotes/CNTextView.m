@@ -384,7 +384,7 @@
         if([suggestions count]){
             NSLog(@"found suggestions for word: %@", word);
             if([suggestions count])
-                dict[@"Cocoa Classes"] = suggestions;
+                dict[checker.checkerName] = suggestions;
         }
     }];
     return dict;

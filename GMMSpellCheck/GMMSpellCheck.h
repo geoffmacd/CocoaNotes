@@ -23,7 +23,10 @@
  Case sensitivity. Insensitive by default.
  */
 @property (nonatomic) BOOL caseInsensitive;
-
+/**
+ User facing spell checker name. IE. English dictionary
+ */
+@property NSString * checkerName;
 
 
 /**
