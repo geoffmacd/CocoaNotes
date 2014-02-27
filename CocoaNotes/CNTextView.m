@@ -54,16 +54,20 @@
     
     _checkers = [NSMutableArray new];
     
-
-    
-    dispatch_queue_t queue = dispatch_queue_create("Geoff", nil);
+    //too slow, put on another thread
+    dispatch_queue_t queue = dispatch_queue_create("GMM", nil);
     dispatch_async(queue, ^{
-        
+    
         CocoaClassesCheck * cocoa = [[CocoaClassesCheck alloc] init];
         [_checkers addObject:cocoa];
         
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            //highlight after they are ready on main thread
+            [self processEditingForAttributes];
+        });
     });
-    
+
     //keyboard notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:UIKeyboardWillHideNotification object:nil];
@@ -90,6 +94,15 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIContentSizeCategoryDidChangeNotification object:nil];
 }
+
+-(void)setText:(NSString *)text{
+    [super setText:text];
+    
+    [self processEditingForAttributes];
+}
+
+#pragma mark
+#pragma mark Suggestions
 
 -(void)showListView:(NSDictionary*)suggestions withFirstIndex:(NSInteger)first{
     
@@ -189,20 +202,6 @@
     return NO;
 }
 
--(NSString*)replaceUserEnteredWord:(NSString*)userWord{
-    
-    //use suggestions
-    NSDictionary * suggestions = [self.suggestionBox dict];
-    if([suggestions count] == 0)
-        return nil;
-    else {   //first one
-        
-        NSString * first = [suggestions[@0] firstObject];
-        
-        return first;
-    }
-}
-
 -(void)replaceWordInTextView:(NSString*)replacement{
     
     NSMutableString * allText = [NSMutableString stringWithString:self.text];
@@ -275,11 +274,16 @@
             [textView setContentOffset:offset];
         }];
     }
+    
+    
 }
 
 -(void)textViewDidChangeSelection:(UITextView *)textView{
     
     NSRange range = textView.selectedRange;
+    //should not have anything selected
+    if(range.length)
+        range.location += range.length;
     NSString * upToLocText = [textView.text substringToIndex:range.location];
 
     NSString* recentWord = [self mostRecentWord:upToLocText atLocation:range.location];
@@ -287,10 +291,21 @@
     if(showingBox){
         curLoc = range.location;
         
+        [self disableAutoComplete];
+        
         if(recentWord){
             //pass changes to suggestion box
             [self continueSuggestions:recentWord];
         } else {
+            //one back due to space or return
+            recentWord = [self mostRecentWord:upToLocText atLocation:range.location-1];
+            if(recentWord && [self containsExact:recentWord]){
+                //replace with exact match
+                curLoc--;
+                NSString * replacement = [self exactWord:recentWord];
+                [self replaceWordInTextView:replacement];
+            }
+            
             //remove list
             [self removeListView];
         }
@@ -405,12 +420,28 @@
         GMMSpellCheck * checker = obj;
         if([checker containsExact:word]){
             exact = YES;
-            NSLog(@"exact word: %@", word);
+            NSLog(@"contains exact: %@", word);
             *stop = YES;
         }
     }];
     return exact;
 
+}
+
+-(NSString*)exactWord:(NSString*)word{
+    
+    __block NSString * exact;;
+    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        GMMSpellCheck * checker = obj;
+        exact = [checker exactWord:word];
+        if(exact){
+            NSLog(@"exact word: %@", word);
+            *stop = YES;
+        }
+    }];
+    return exact;
+    
 }
 
 @end
