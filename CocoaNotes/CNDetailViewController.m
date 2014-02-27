@@ -52,6 +52,9 @@
     }
     
     [_textView setParentControl:self];
+    
+    //add cursor movement gestures
+    self.cursorMovement = [[JTSCursorMovement alloc] initWithTextView:_textView];
 }
 
 - (void)viewDidLoad

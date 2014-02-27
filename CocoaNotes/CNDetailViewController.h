@@ -8,12 +8,15 @@
 
 #import <UIKit/UIKit.h>
 #import "CNTextView.h"
+#import <JTSCursorMovement.h>
 
 @interface CNDetailViewController : UIViewController <UISplitViewControllerDelegate,CNTextViewDelegate>{
     CNTextView * _textView;
 }
 
 @property (strong, nonatomic) id detailItem;
+
+@property (strong,nonatomic) JTSCursorMovement * cursorMovement;
 
 @property NSManagedObjectContext * context;
 @end

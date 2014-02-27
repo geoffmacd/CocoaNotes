@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "GMMSpellCheck.h"
+
 @protocol CNSuggestionViewControllerDelegate <NSObject>
 
 -(void)didSelectWord:(NSString*)word;
@@ -16,8 +18,9 @@
 
 @interface CNSuggestionViewController : UITableViewController
 
-@property (nonatomic) NSArray * list;
+@property (nonatomic) NSDictionary * dict;
 @property NSString * started;
 @property (weak) id<CNSuggestionViewControllerDelegate> delegate;
+@property NSMutableArray * order;
 
 @end
