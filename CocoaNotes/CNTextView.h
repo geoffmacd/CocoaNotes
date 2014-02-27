@@ -10,8 +10,11 @@
 
 #import "CNSuggestionViewController.h"
 #import "CNTextStorage.h"
+#import "CNTagView.h"
 
-#define kSuggestorHeight     120
+#define kSuggestorHeight        120
+#define kTagOffset              40
+#define kTagHeight              30
 
 
 @protocol CNTextViewDelegate <NSObject>
@@ -30,10 +33,10 @@
     NSCharacterSet * _invalidCharSet;
     CNTextStorage * _storage;
     NSMutableArray * _checkers;
+    NSMutableArray * tagViews;
 }
 
 @property CNSuggestionViewController * suggestionBox;
-
 @property (weak) id<CNTextViewDelegate> parentControl;
 
 @end

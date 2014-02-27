@@ -63,6 +63,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preferredContentSizeChanged) name:UIContentSizeCategoryDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tagViewDidChange:) name:kTagViewTextChange object:nil];
     
     //invalid characters
     NSMutableCharacterSet * programmaticSet = [NSCharacterSet alphanumericCharacterSet];
@@ -71,6 +72,13 @@
     //form set with only alphanumeric without whitespaces
     [programmaticSet formIntersectionWithCharacterSet:whitespace];
     _invalidCharSet = [programmaticSet invertedSet];
+    
+    tagViews = [NSMutableArray new];
+    
+    CNTagView * tagView = [[CNTagView alloc] initWithFrame:CGRectMake(10, 400, 100, kTagHeight) withName:nil];
+    [tagView.field sizeToFit];
+    [self addSubview:tagView];
+    [tagViews addObject:tagView];
 }
 
 -(void)preferredContentSizeChanged{
@@ -82,6 +90,15 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIContentSizeCategoryDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:kTagViewTextChange object:nil];
+}
+
+-(void)tagViewDidChange:(NSNotification*)notification{
+    
+    //dictionary contains new tag size
+    CNTagView * changing = notification.object;
+    
+    
 }
 
 -(void)showListView:(NSArray*)suggestions withFirstIndex:(NSInteger)first{
@@ -401,6 +418,16 @@
     kbSize = [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     //adjust for keyboard
     [self setContentInset:UIEdgeInsetsMake(64, 0, kbSize.height, 0)];
+    
+    //adjust tagviews
+    [tagViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        CNTagView * view = obj;
+        CGRect frame = view.frame;
+        frame.origin.y -= kbSize.height;
+        view.frame = frame;
+
+    }];
 }
 
 -(void)willHideKeyboard:(NSNotification*)notify{
@@ -414,6 +441,15 @@
     //scroll to text selection
     NSRange r =self.selectedRange;
     [self scrollRangeToVisible:r];
+    
+    //adjust tagviews
+    [tagViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        CNTagView * view = obj;
+        CGRect frame = view.frame;
+        frame.origin.y = self.bounds.size.height - kTagOffset - frame.size.height;
+        view.frame = frame;
+    }];
 }
 
 #pragma CNTextStorageDelegate
