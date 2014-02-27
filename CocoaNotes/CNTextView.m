@@ -54,8 +54,15 @@
     
     _checkers = [NSMutableArray new];
     
-    CocoaClassesCheck * cocoa = [[CocoaClassesCheck alloc] init];
-    [_checkers addObject:cocoa];
+
+    
+    dispatch_queue_t queue = dispatch_queue_create("Geoff", nil);
+    dispatch_async(queue, ^{
+        
+        CocoaClassesCheck * cocoa = [[CocoaClassesCheck alloc] init];
+        [_checkers addObject:cocoa];
+        
+    });
     
     //keyboard notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:UIKeyboardDidShowNotification object:nil];
