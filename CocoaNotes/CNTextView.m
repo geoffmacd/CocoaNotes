@@ -1,4 +1,4 @@
- //
+  //
 //  CNTextView.m
 //  CocoaNotes
 //
@@ -7,8 +7,8 @@
 //
 
 #import "CNTextView.h"
-#import "CocoaCheck.h"
-#import "FoundationCheck.h"
+#import "CocoaClassesCheck.h"
+#import "GMMSpellCheck.h"
 
 @implementation CNTextView
 
@@ -54,10 +54,8 @@
     
     _checkers = [NSMutableArray new];
     
-    CocoaCheck * cocoa = [[CocoaCheck alloc] init];
+    CocoaClassesCheck * cocoa = [[CocoaClassesCheck alloc] init];
     [_checkers addObject:cocoa];
-    FoundationCheck * found = [[FoundationCheck alloc] init];
-    [_checkers addObject:found];
     
     //keyboard notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:UIKeyboardDidShowNotification object:nil];
@@ -143,42 +141,13 @@
     });
 }
 
--(BOOL)shouldAutoComplete:(NSString*)word{
-    
-    //check checkers for any matches without returning them
-    __block BOOL should = NO;
-    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        
-        CNProgrammaticSpellCheck * checker = obj;
-        if([checker isPotential:word]){
-            should = YES;
-            NSLog(@"is potential");
-            *stop = YES;
-        }
-    }];
-    return should;
-}
-
 -(void)showAutoComplete:(NSString*)word withStartIndex:(NSInteger)index{
     
-    __block NSMutableDictionary * dict = [NSMutableDictionary new];
-    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        
-        CNProgrammaticSpellCheck * checker = obj;
-        NSArray * clas =[checker listClasses:word   ];
-        NSArray * meth =[checker listMethods:word];
-        if([clas count] || [meth count]){
-            NSLog(@"found suggestions");
-            if([clas count])
-                dict[kClasses] = clas;
-            if([meth count])
-                dict[kMethods] = meth;
-        }
-    }];
+    NSDictionary * suggestionDict = [self listSuggestions:word];
     
     //decide to display suggestion box
-    if([dict count]){
-        [self showListView:dict withFirstIndex:index];
+    if([suggestionDict count]){
+        [self showListView:suggestionDict withFirstIndex:index];
     }
 }
 
@@ -194,23 +163,13 @@
     
     //determine whether suggestion box should still be displayed
     
-    if([recentWord length] >=  2){
+    if([self isPotential:recentWord]){
         
-        __block NSMutableDictionary * dict = [NSMutableDictionary new];
-        [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            
-            CNProgrammaticSpellCheck * checker = obj;
-            NSArray * clas =[checker listClasses:recentWord];
-            NSArray * meth =[checker listMethods:recentWord];
-            if([clas count])
-                dict[kClasses] = clas;
-            if([meth count])
-                dict[kMethods] = meth;
-        }];
+        NSDictionary * suggestionDict = [self listSuggestions:recentWord];
         
-        if([dict count]){
+        if([suggestionDict count]){
             //update words
-            [self.suggestionBox setDict:dict];
+            [self.suggestionBox setDict:suggestionDict];
             return YES;
         } else {
             //remove suggestion box
@@ -231,10 +190,7 @@
         return nil;
     else {   //first one
         
-        NSString * first = [suggestions[kClasses] firstObject];
-        if(!first){
-            first = [suggestions[kMethods] firstObject];
-        }
+        NSString * first = [suggestions[@0] firstObject];
         
         return first;
     }
@@ -252,20 +208,6 @@
     [allText insertString:replacement atIndex:firstIndex];
     //replace textview text
     self.text = [NSString stringWithString:allText];
-}
-
--(BOOL)shouldHighlight:(NSString*)word{
-    
-    __block BOOL found = NO;
-    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        
-        CNProgrammaticSpellCheck * checker = obj;
-        if([checker isExactClass:word]){
-            found = YES;
-            *stop = YES;
-        }
-    }];
-    return found;
 }
 
 /**
@@ -308,7 +250,8 @@
     return nil;
 }
 
-#pragma UITextViewDelegate
+#pragma mark
+#pragma mark UITextViewDelegate
 
 -(void)textViewDidChange:(UITextView *)textView{
     
@@ -345,22 +288,21 @@
             [self removeListView];
         }
     } else{
-        if([recentWord length] >= 2){
-            if([self shouldAutoComplete:recentWord]){
-                
-                //show suggestion box
-                NSLog(@"checking potential: %@",recentWord);
-                //disable
-                [self disableAutoComplete];
-                ///show suggestion box
-                curLoc = range.location;
-                [self showAutoComplete:recentWord withStartIndex:range.location - [recentWord length]];
-            }
+        if([self isPotential:recentWord]){
+            
+            //show suggestion box
+            NSLog(@"checking potential: %@",recentWord);
+            //disable
+            [self disableAutoComplete];
+            ///show suggestion box
+            curLoc = range.location;
+            [self showAutoComplete:recentWord withStartIndex:range.location - [recentWord length]];
         }
     }
 }
 
-#pragma CNSuggestionViewControllerDelegate
+#pragma mark
+#pragma mark CNSuggestionViewControllerDelegate
 
 -(void)didSelectWord:(NSString *)word{
     
@@ -371,7 +313,8 @@
     [self removeListView];
 }
 
-#pragma Keyboard notifications
+#pragma mark
+#pragma mark Keyboard notifications
 
 -(void)didShowKeyboard:(NSNotification*)notify{
     
@@ -393,7 +336,8 @@
     [self scrollRangeToVisible:r];
 }
 
-#pragma CNTextStorageDelegate
+#pragma mark
+#pragma mark CNTextStorageDelegate
 
 -(void)processEditingForAttributes{
     //highlight syntax
@@ -405,11 +349,61 @@
         
         NSString * word = [allText substringWithRange:tokenRange];
         
-        if([self shouldHighlight:word])
+        if([self containsExact:word])
             [_storage addAttribute:NSForegroundColorAttributeName value:[UIColor redColor] range:tokenRange];
         else    //need to remove else text attributes are scrambled
             [_storage removeAttribute:NSForegroundColorAttributeName range:tokenRange];
     }];
+}
+
+#pragma mark
+#pragma mark GMMSpellChecker combines
+
+-(BOOL)isPotential:(NSString*)word{
+    
+    __block BOOL should = NO;
+    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        GMMSpellCheck * checker = obj;
+        if([checker isPotential:word]){
+            should = YES;
+            NSLog(@"is potential for word: %@", word);
+            *stop = YES;
+        }
+    }];
+    return should;
+}
+
+-(NSDictionary*)listSuggestions:(NSString*)word{
+    
+    __block NSMutableDictionary * dict = [NSMutableDictionary new];
+    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        GMMSpellCheck * checker = obj;
+        NSArray * suggestions = [checker listSuggestions:word];
+        if([suggestions count]){
+            NSLog(@"found suggestions for word: %@", word);
+            if([suggestions count])
+                dict[@"Cocoa Classes"] = suggestions;
+        }
+    }];
+    return dict;
+}
+
+-(BOOL)containsExact:(NSString*)word{
+    
+    __block BOOL exact = NO;
+    [_checkers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        GMMSpellCheck * checker = obj;
+        if([checker containsExact:word]){
+            exact = YES;
+            NSLog(@"exact word: %@", word);
+            *stop = YES;
+        }
+    }];
+    return exact;
+
 }
 
 @end

@@ -1,0 +1,3 @@
+[submodule "GMMSpellCheck"]
+	path = GMMSpellCheck
+	url = https://github.com/geoffmacd/GMMSpellCheck.git

@@ -22,6 +22,7 @@ static NSString *CellIdentifier = @"Cell";
     if (self) {
         // Custom initialization
         [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CellIdentifier];
+        [self.tableView setBackgroundColor:[UIColor lightGrayColor]];
         _order = [NSMutableArray new];
     }
     return self;
@@ -92,10 +93,28 @@ static NSString *CellIdentifier = @"Cell";
     
     [_order removeAllObjects];
     
-    if(_dict[kClasses])
-        [_order addObject:kClasses];
-    if(_dict[kMethods])
-        [_order addObject:kMethods];
+    //order by most
+    _order = [NSMutableArray arrayWithArray:[dict allKeys]];
+    [_order sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        
+        NSArray * a1 = _dict[obj1];
+        NSArray * a2 = _dict[obj2];
+        
+        if ([a1 count] > [a2 count]) {
+            return (NSComparisonResult)NSOrderedDescending;
+        }
+    
+        if ([a1 count] < [a2 count]) {
+            return (NSComparisonResult)NSOrderedAscending;
+        }
+        return (NSComparisonResult)NSOrderedSame;
+    }];
+    
+    
+    if(_dict[@"Cocoa Classes"])
+        [_order addObject:@"Cocoa Classes"];
+    
+    
     
     
     [self.tableView reloadData];

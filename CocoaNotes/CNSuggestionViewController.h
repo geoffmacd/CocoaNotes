@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "CNProgrammaticSpellCheck.h"
+#import "GMMSpellCheck.h"
 
 @protocol CNSuggestionViewControllerDelegate <NSObject>
 

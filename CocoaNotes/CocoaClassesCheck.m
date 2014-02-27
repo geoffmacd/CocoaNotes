@@ -6,18 +6,17 @@
 //  Copyright (c) 2014 GeoffMacDonald. All rights reserved.
 //
 
-#import "CocoaCheck.h"
+#import "CocoaClassesCheck.h"
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 
-@implementation CocoaCheck
+@implementation CocoaClassesCheck
 
 
 static NSArray * a;
 
 
--(void)config{
-    self.prefix = @"ui";
+-(void)setup{
     
     a = @[@"corefoundation",@"coredata",@"coregraphics",@"uikit"];
     
@@ -25,8 +24,7 @@ static NSArray * a;
     unsigned int count1;
     const char** images = objc_copyImageNames(&count1);
     
-    NSMutableArray * clas  = [NSMutableArray new];
-    NSMutableArray * meths = [NSMutableArray new];
+    NSMutableArray * classArray  = [NSMutableArray new];
     
     for(NSInteger k = 0 ; k < count1; k++){
         
@@ -35,7 +33,7 @@ static NSArray * a;
         NSString * libName = [NSString stringWithCString:name encoding:NSStringEncodingConversionAllowLossy];
         libName = [[[libName lastPathComponent] stringByDeletingPathExtension] lowercaseString];
         
-        //test if in our list
+        //test if in our library list
         if([a indexOfObject:libName] != NSNotFound){
             
             const char** classes = objc_copyClassNamesForImage(name, &count2);
@@ -45,22 +43,8 @@ static NSArray * a;
             for (NSInteger i = 0 ; i < count2; i++) {
                 NSString  * className = [NSString stringWithCString:classes[i] encoding:NSStringEncodingConversionAllowLossy];
                 NSRange r = [className rangeOfCharacterFromSet:underscored];
-                if([[[className substringToIndex:2] lowercaseString] isEqualToString:self.prefix] && r.location == NSNotFound){
-                    [clas addObject:className];
-                    
-                    //get methods for class
-                    Class class = objc_getClass(classes[i]);
-                    unsigned int count3;
-                    Method * methods = class_copyMethodList(class, &count3);
-                    
-                    for (NSInteger j = 0 ; j < count3; j++) {
-                        Method meth = methods[j];
-                        const char * methNameC =  sel_getName(method_getName(meth));
-                        if(methNameC){
-                            NSString  * methName = [NSString stringWithCString:methNameC encoding:NSStringEncodingConversionAllowLossy];
-                            [meths addObject:methName];
-                        }
-                    }
+                if(r.location == NSNotFound){
+                    [classArray addObject:className];
                 }
             }
             free(classes);
@@ -71,8 +55,7 @@ static NSArray * a;
     free(images);
     
     //sort by name
-    self.classNames = [clas sortedArrayUsingSelector:@selector(compare:)];
-    self.methodNames = [meths sortedArrayUsingSelector:@selector(compare:)];
+    [self addToSpellCheck:[classArray sortedArrayUsingSelector:@selector(compare:)]];
     
 }
 
