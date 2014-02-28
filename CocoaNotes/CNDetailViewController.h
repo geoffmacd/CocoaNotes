@@ -9,14 +9,17 @@
 #import <UIKit/UIKit.h>
 #import "CNTextView.h"
 #import <JTSCursorMovement.h>
+#import "CNTagView.h"
 
-@interface CNDetailViewController : UIViewController <UISplitViewControllerDelegate,CNTextViewDelegate>{
+@interface CNDetailViewController : UIViewController <UISplitViewControllerDelegate,UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, CNTextViewDelegate>{
     CNTextView * _textView;
+    NSMutableArray * tagViews;
 }
 
 @property (strong, nonatomic) id detailItem;
 
 @property (strong,nonatomic) JTSCursorMovement * cursorMovement;
+@property UICollectionView * tagCollectionView;
 
 @property NSManagedObjectContext * context;
 @end

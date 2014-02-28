@@ -18,7 +18,7 @@ static NSArray * a;
 
 -(void)setup{
     
-    a = @[@"corefoundation",@"coredata",@"coregraphics",@"uikit"];
+    a = @[@"foundation",@"corefoundation",@"coredata",@"coregraphics",@"uikit"];
     
     //generate method names from objc
     unsigned int count1;

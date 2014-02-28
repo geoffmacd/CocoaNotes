@@ -16,16 +16,18 @@
     if (self) {
         // Initialization code
         
-//        [self setBackgroundColor:[UIColor greenColor]];
-        
         _field = [[UITextField alloc] initWithFrame:[self bounds]];
         _field.borderStyle = UITextBorderStyleRoundedRect;
+        _field.returnKeyType = UIReturnKeyDone;
+        _field.enablesReturnKeyAutomatically = YES;
+        self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        _field.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//        _field.clearButtonMode = UITextFieldViewModeWhileEditing;
         [_field setBackgroundColor:[UIColor groupTableViewBackgroundColor]];
-        [_field setPlaceholder:@"Tag"];
         if(tagName)
             [self setName:tagName];
         else
-            [self setName:@"Tag"];
+            [self setName:@"tag"];
         [_field setTextColor:[UIColor purpleColor]];
         [_field setDelegate:self];
         [_field setEnabled:YES];
@@ -35,25 +37,34 @@
     return self;
 }
 
-
 -(void)setName:(NSString *)name{
     _name = name;
     
     [_field setText:name];
 }
 
+-(BOOL)textFieldShouldReturn:(UITextField *)textField{
+    [_field resignFirstResponder];
+    return NO;
+}
+
 -(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string{
     
-    [self setName:_field.text];
-    
-    //resize
-    CGSize size =  [_field.text sizeWithAttributes:nil];
-    NSValue *value = [NSValue valueWithCGSize:size];
-    NSDictionary * dict = @{@"rect":value};
-    [[NSNotificationCenter defaultCenter] postNotificationName:kTagViewTextChange object:self userInfo:dict];
-    
+    NSUInteger newLength = [textField.text length] + [string length] - range.length;
+    if(newLength > 15)
+        return NO;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kTagViewTextChange object:self userInfo:nil];
     return YES;
 }
 
+-(void)textFieldDidBeginEditing:(UITextField *)textField{
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kTagViewTextEditing object:self userInfo:nil];
+}
+
+-(void)textFieldDidEndEditing:(UITextField *)textField{
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kTagViewEndedTextEditing object:self userInfo:nil];
+}
 
 @end

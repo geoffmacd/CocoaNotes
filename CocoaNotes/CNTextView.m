@@ -71,8 +71,8 @@
     //keyboard notifications
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:UIKeyboardWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willShowKeyboard:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preferredContentSizeChanged) name:UIContentSizeCategoryDidChangeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tagViewDidChange:) name:kTagViewTextChange object:nil];
     
     //invalid characters
     NSMutableCharacterSet * programmaticSet = [NSCharacterSet alphanumericCharacterSet];
@@ -84,12 +84,7 @@
     [programmaticSet formIntersectionWithCharacterSet:methodSet];
     _invalidCharSet = [programmaticSet invertedSet];
     
-    tagViews = [NSMutableArray new];
-    
-    CNTagView * tagView = [[CNTagView alloc] initWithFrame:CGRectMake(10, 400, 100, kTagHeight) withName:nil];
-    [tagView.field sizeToFit];
-    [self addSubview:tagView];
-    [tagViews addObject:tagView];
+
 }
 
 -(void)preferredContentSizeChanged{
@@ -99,17 +94,9 @@
 
 -(void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIContentSizeCategoryDidChangeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:kTagViewTextChange object:nil];
-}
-
--(void)tagViewDidChange:(NSNotification*)notification{
-    
-    //dictionary contains new tag size
-    CNTagView * changing = notification.object;
-    
-    
 }
 
 -(void)setText:(NSString *)text{
@@ -173,7 +160,6 @@
             offset.y += overflow + 7; // leave 7 pixels margin
             // Cannot animate with setContentOffset:animated: or caret will not appear
             [self setContentOffset:offset];
-
         }
     });
 }
@@ -359,17 +345,11 @@
     
     kbSize = [notify.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     //adjust for keyboard
-    [self setContentInset:UIEdgeInsetsMake(64, 0, kbSize.height, 0)];
-    
-    //adjust tagviews
-    [tagViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        
-        CNTagView * view = obj;
-        CGRect frame = view.frame;
-        frame.origin.y -= kbSize.height;
-        view.frame = frame;
+    [self setContentInset:UIEdgeInsetsMake(64, 0, kbSize.height + kTagHeight + 5, 0)];
+}
 
-    }];
+-(void)willShowKeyboard:(NSNotification*)notify{
+
 }
 
 -(void)willHideKeyboard:(NSNotification*)notify{
@@ -383,15 +363,6 @@
     //scroll to text selection
     NSRange r =self.selectedRange;
     [self scrollRangeToVisible:r];
-    
-    //adjust tagviews
-    [tagViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        
-        CNTagView * view = obj;
-        CGRect frame = view.frame;
-        frame.origin.y = self.bounds.size.height - kTagOffset - frame.size.height;
-        view.frame = frame;
-    }];
 }
 
 #pragma mark
@@ -406,6 +377,7 @@
     [allText enumerateLinguisticTagsInRange:r scheme:NSLinguisticTagSchemeTokenType options:NSLinguisticTaggerOmitWhitespace|NSLinguisticTaggerOmitPunctuation orthography:Nil usingBlock:^(NSString *tag, NSRange tokenRange, NSRange sentenceRange, BOOL *stop) {
         
         NSString * word = [allText substringWithRange:tokenRange];
+//        NSLog(@"%@",word);
         
         if([self containsExact:word])
             [_storage addAttribute:NSForegroundColorAttributeName value:[UIColor redColor] range:tokenRange];

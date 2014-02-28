@@ -10,7 +10,6 @@
 
 #import "CNSuggestionViewController.h"
 #import "CNTextStorage.h"
-#import "CNTagView.h"
 
 #define kSuggestorHeight        120
 #define kTagOffset              40
@@ -33,7 +32,6 @@
     NSCharacterSet * _invalidCharSet;
     CNTextStorage * _storage;
     NSMutableArray * _checkers;
-    NSMutableArray * tagViews;
 }
 
 @property CNSuggestionViewController * suggestionBox;

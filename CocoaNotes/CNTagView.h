@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 
 #define kTagViewTextChange  @"TextViewDidChange"
+#define kTagViewTextEditing @"TagViewEditing"
+#define kTagViewEndedTextEditing @"TagViewEditingEnd"
 
 @interface CNTagView : UIView <UITextFieldDelegate>
 
