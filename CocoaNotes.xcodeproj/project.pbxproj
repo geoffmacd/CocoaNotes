@@ -60,8 +60,8 @@
 		24B19D1518C17FD60028B185 /* JSSlidingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSSlidingViewController.h; sourceTree = "<group>"; };
 		24B19D1618C17FD60028B185 /* JSSlidingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSSlidingViewController.m; sourceTree = "<group>"; };
 		24B19D4418C17FD90028B185 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
-		24B19D6B18C180BD0028B185 /* CNDrawerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CNDrawerViewController.h; path = ../JSSlidingViewController/JSSlidingViewController/CNDrawerViewController.h; sourceTree = "<group>"; };
-		24B19D6C18C180BD0028B185 /* CNDrawerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CNDrawerViewController.m; path = ../JSSlidingViewController/JSSlidingViewController/CNDrawerViewController.m; sourceTree = "<group>"; };
+		24B19D6B18C180BD0028B185 /* CNDrawerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNDrawerViewController.h; sourceTree = "<group>"; };
+		24B19D6C18C180BD0028B185 /* CNDrawerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNDrawerViewController.m; sourceTree = "<group>"; };
 		24D2DCC518B07AA7000E73DD /* CocoaClassesCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CocoaClassesCheck.h; sourceTree = "<group>"; };
 		24D2DCC618B07AA7000E73DD /* CocoaClassesCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CocoaClassesCheck.m; sourceTree = "<group>"; };
 		24D2DCCB18B1CC9A000E73DD /* CNSuggestionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNSuggestionViewController.h; sourceTree = "<group>"; };
