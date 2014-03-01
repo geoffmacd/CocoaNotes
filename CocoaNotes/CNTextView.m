@@ -31,7 +31,7 @@
                                       initWithString:@""
                                       attributes:attrs];
     _storage = [CNTextStorage new];
-    _storage.delegate = self;
+    _storage.textDelegate = self;
     [_storage appendAttributedString:attrString];
     
     // Create the layout manager
@@ -64,7 +64,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             
             //highlight after they are ready on main thread
-            [self processEditingForAttributes];
+            [self processHighlighting];
         });
     });
 
@@ -102,7 +102,7 @@
 -(void)setText:(NSString *)text{
     [super setText:text];
     
-    [self processEditingForAttributes];
+    [self processHighlighting];
 }
 
 #pragma mark
@@ -368,7 +368,7 @@
 #pragma mark
 #pragma mark CNTextStorageDelegate
 
--(void)processEditingForAttributes{
+-(void)processHighlighting{
     //highlight syntax
     NSString * allText = _storage.string;
     NSRange r = {0, [allText length]};

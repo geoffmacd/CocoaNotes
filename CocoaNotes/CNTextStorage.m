@@ -48,7 +48,7 @@
     
     [super processEditing];
  
-    [self.delegate processEditingForAttributes];
+    [self.textDelegate processHighlighting];
 }
 
 @end

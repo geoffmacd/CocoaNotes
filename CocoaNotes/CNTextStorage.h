@@ -10,7 +10,7 @@
 
 @protocol CNTextStorageDelegate <NSObject>
 
--(void)processEditingForAttributes;
+-(void)processHighlighting;
 
 @end
 
@@ -18,6 +18,6 @@
     NSMutableAttributedString * _backingStore;
 }
 
-@property id<CNTextStorageDelegate> delegate;
+@property (weak,nonatomic) id<CNTextStorageDelegate> textDelegate;
 
 @end

@@ -9,6 +9,7 @@
 #import "CNAppDelegate.h"
 
 #import "CNMasterViewController.h"
+#import "JSSlidingViewController.h"
 
 @implementation CNAppDelegate
 
@@ -18,14 +19,21 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    
-    CNMasterViewController *controller = [[CNMasterViewController alloc] init];
-    controller.managedObjectContext = self.managedObjectContext;
-    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:controller];
+    CNMasterViewController * masterView = [[CNMasterViewController alloc] init];
+    masterView.managedObjectContext = self.managedObjectContext;
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:masterView];
     [navigationController.view setTintColor:[UIColor purpleColor]];
+    
+    _drawerView = [[CNDrawerViewController alloc] initWithStyle:UITableViewStylePlain];
+    [self refreshDrawerTags];
+
+    
+    JSSlidingViewController * slidingController = [[JSSlidingViewController alloc] initWithFrontViewController:navigationController backViewController:_drawerView];
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.rootViewController = navigationController;
+    self.window.rootViewController = slidingController;
     [self.window makeKeyAndVisible];
+    
     
     
     return YES;
@@ -74,6 +82,19 @@
 }
 
 #pragma mark - Core Data stack
+
+
+-(void)refreshDrawerTags{
+    
+    NSFetchRequest * req = [[NSFetchRequest alloc] initWithEntityName:@"Note"];
+    NSError * err;
+    
+    NSArray * tags = [_managedObjectContext executeFetchRequest:req error:&err];
+    
+    if(!err){
+        [_drawerView setTagArray:tags];
+    }
+}
 
 // Returns the managed object context for the application.
 // If the context doesn't already exist, it is created and bound to the persistent store coordinator for the application.

@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CNDrawerViewController.h"
 
 @interface CNAppDelegate : UIResponder <UIApplicationDelegate>
 
@@ -15,6 +16,8 @@
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+@property CNDrawerViewController * drawerView;
 
 - (void)saveContext;
 - (NSURL *)applicationDocumentsDirectory;

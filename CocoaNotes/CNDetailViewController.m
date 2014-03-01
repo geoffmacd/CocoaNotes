@@ -57,6 +57,7 @@
     
     UICollectionViewFlowLayout * flow = [[UICollectionViewFlowLayout alloc] init];
     flow.scrollDirection = UICollectionViewScrollDirectionVertical;
+    flow.minimumInteritemSpacing = 25.0f;
     _tagCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 500, self.view.bounds.size.width, 40) collectionViewLayout:flow];
     [_tagCollectionView setDelegate:self];
     [_tagCollectionView setDataSource:self];
@@ -157,14 +158,13 @@
     
     CNTagView * tag = tagViews[[indexPath row]];
     
-    CGFloat width = [tag.field.text sizeWithFont:tag.field.font].width + 5;
+    CGFloat width = [tag.field.text sizeWithAttributes:@{}].width + 10;
     return CGSizeMake(width, kTagHeight);
 }
 
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     
     UICollectionViewCell * cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
-    
     
     CNTagView * tagView = [tagViews objectAtIndex:[indexPath row]];
     //add subview
@@ -212,7 +212,7 @@
     UICollectionViewCell * cell = ( UICollectionViewCell *)[changing superview];
     
     
-    CGFloat width = [changing.field.text sizeWithFont:changing.field.font].width + 35;
+    CGFloat width = [changing.field.text sizeWithAttributes:@{}].width + 30;
     CGRect rect = cell.frame;
     rect.size.width = width;
     [cell setFrame:rect];
@@ -223,7 +223,7 @@
     UICollectionViewCell * cell = ( UICollectionViewCell *)[changing superview];
     
     
-    CGFloat width = [changing.field.text sizeWithFont:changing.field.font].width + 35;
+    CGFloat width = [changing.field.text sizeWithAttributes:@{}].width + 30;
     CGRect rect = cell.frame;
     rect.size.width = width;
     [cell setFrame:rect];
@@ -233,16 +233,17 @@
     CNTagView * changing = notification.object;
     UICollectionViewCell * cell = ( UICollectionViewCell *)[changing superview];
     
-    CGFloat width = [changing.field.text sizeWithFont:changing.field.font].width + 5;
+    CGFloat width = [changing.field.text sizeWithAttributes:@{}].width + 5;
     CGRect rect = cell.frame;
     rect.size.width = width;
     [cell setFrame:rect];
     
     if([changing.name length]){
         //it is real, add another tag view
-        
-        CNTagView * blankTag = [[CNTagView alloc] initWithFrame:CGRectMake(0, 0, 45, kTagHeight) withName:nil];
-        [tagViews addObject:blankTag];
+        if([tagViews count] <= 5){
+            CNTagView * blankTag = [[CNTagView alloc] initWithFrame:CGRectMake(0, 0, 45, kTagHeight) withName:nil];
+            [tagViews addObject:blankTag];
+        }
         
         [_tagCollectionView reloadData];
     }
