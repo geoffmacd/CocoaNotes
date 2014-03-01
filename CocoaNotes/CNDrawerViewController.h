@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Tag.h"
 
 @protocol DrawerDelegate <NSObject>
 
@@ -16,7 +17,7 @@
 
 @interface CNDrawerViewController : UITableViewController
 
-@property (strong,nonatomic) NSArray * tagArray;
+@property (nonatomic) NSArray * tagArray;
 
 @property (weak) id<DrawerDelegate> delegate;
 

@@ -9,6 +9,10 @@
 #import "CNMasterViewController.h"
 
 #import "CNDetailViewController.h"
+#import "Note.h"
+#import "Tag.h"
+#import "CNAppDelegate.h"
+#import "JSSlidingViewController.h"
 
 @interface CNMasterViewController ()
 - (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath;
@@ -28,6 +32,12 @@
     self.detailViewController = (CNDetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
+}
+
+-(void)viewDidAppear:(BOOL)animated{
+    
+    CNAppDelegate * appDel = (CNAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDel.slidingController setLocked:NO];
 }
 
 - (void)didReceiveMemoryWarning
@@ -57,11 +67,23 @@
     }
 }
 
+-(void)setTagSort:(NSManagedObjectID *)tagSort{
+    
+    _tagSort = tagSort;
+    
+    //update fetch results for tag
+    [NSFetchedResultsController deleteCacheWithName:@"Master"];
+    _fetchedResultsController = nil;
+    
+    [self.tableView reloadData];
+}
+
 #pragma mark - Table View
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return [[self.fetchedResultsController sections] count];
+    NSInteger count = [[self.fetchedResultsController sections] count];
+    return count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -87,7 +109,15 @@
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSManagedObjectContext *context = [self.fetchedResultsController managedObjectContext];
-        [context deleteObject:[self.fetchedResultsController objectAtIndexPath:indexPath]];
+        Note * note = [self.fetchedResultsController objectAtIndexPath:indexPath];
+        NSOrderedSet * tags = note.tags;
+        [tags enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+           //if tag has just 1 post delete
+            Tag * tag = obj;
+            if([tag.notes count] == 1)
+                [context deleteObject:tag];
+        }];
+        [context deleteObject:note];
         
         NSError *error = nil;
         if (![context save:&error]) {
@@ -96,6 +126,10 @@
             NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
             abort();
         }
+        
+        CNAppDelegate * appDel = (CNAppDelegate *)[[UIApplication sharedApplication] delegate];
+        [appDel.drawerView setTagArray:[appDel getTags]];
+        
     }   
 }
 
@@ -108,15 +142,18 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-    NSManagedObject *object = [[self fetchedResultsController] objectAtIndexPath:indexPath];
+    Note * note = [[self fetchedResultsController] objectAtIndexPath:indexPath];
     
     CNDetailViewController * vc = [[CNDetailViewController alloc] init];
     
-    [vc setDetailItem:object];
+    [vc setNote:note];
     [vc setContext:self.managedObjectContext];
-    [self.navigationController pushViewController:vc animated:YES];
     
-
+    //prevent slider
+    CNAppDelegate * appDel = (CNAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDel.slidingController setLocked:YES];
+    
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 
@@ -132,6 +169,13 @@
     // Edit the entity name as appropriate.
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"Note" inManagedObjectContext:self.managedObjectContext];
     [fetchRequest setEntity:entity];
+    if(_tagSort){
+        //only return notes with selected tag
+        Tag * tag = (Tag*)[_managedObjectContext objectWithID:_tagSort];
+        NSPredicate * pred = [NSPredicate predicateWithFormat:@"tags.name CONTAINS %@", tag.name];
+        [fetchRequest setPredicate:pred];
+    }
+
     
     // Set the batch size to a suitable number.
     [fetchRequest setFetchBatchSize:20];
@@ -155,6 +199,8 @@
 	    NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
 	    abort();
 	}
+    
+    NSArray * obj = [self.fetchedResultsController fetchedObjects];
     
     return _fetchedResultsController;
 }    

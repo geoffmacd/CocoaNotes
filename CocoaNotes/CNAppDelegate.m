@@ -8,8 +8,8 @@
 
 #import "CNAppDelegate.h"
 
-#import "CNMasterViewController.h"
-#import "JSSlidingViewController.h"
+#import "Tag.h"
+#import "Note.h"
 
 @implementation CNAppDelegate
 
@@ -19,24 +19,35 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    CNMasterViewController * masterView = [[CNMasterViewController alloc] init];
-    masterView.managedObjectContext = self.managedObjectContext;
-    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:masterView];
+    _masterView = [[CNMasterViewController alloc] init];
+    _masterView.managedObjectContext = self.managedObjectContext;
+    [_masterView setTagSort:nil];
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:_masterView];
     [navigationController.view setTintColor:[UIColor purpleColor]];
     
     _drawerView = [[CNDrawerViewController alloc] initWithStyle:UITableViewStylePlain];
-    [self refreshDrawerTags];
+    _drawerView.delegate = self;
+    [_drawerView setTagArray:[self getTags]];
 
     
-    JSSlidingViewController * slidingController = [[JSSlidingViewController alloc] initWithFrontViewController:navigationController backViewController:_drawerView];
+    _slidingController = [[JSSlidingViewController alloc] initWithFrontViewController:navigationController backViewController:_drawerView];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.rootViewController = slidingController;
+    self.window.rootViewController = _slidingController;
     [self.window makeKeyAndVisible];
     
     
     
     return YES;
+}
+
+-(void)selectedTag:(NSManagedObjectID *)tagId{
+    
+    
+    [_masterView setTagSort:tagId];
+    
+    [_slidingController closeSlider:YES completion:nil];
+    
 }
 							
 - (void)applicationWillResignActive:(UIApplication *)application
@@ -83,18 +94,42 @@
 
 #pragma mark - Core Data stack
 
-
--(void)refreshDrawerTags{
+- (void)insertNewTag:(NSString*)tagName withInitialNote:(NSManagedObjectID*)firstNoteId{
     
-    NSFetchRequest * req = [[NSFetchRequest alloc] initWithEntityName:@"Note"];
+    NSManagedObjectContext *context = [self managedObjectContext];
+    
+    Note * firstNote = (Note * )[context existingObjectWithID:firstNoteId error:nil];
+    Tag * newTag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag" inManagedObjectContext:context];
+    
+    [newTag setName:tagName];
+    NSOrderedSet * noteSet = [[NSOrderedSet alloc] initWithArray:@[firstNote]];
+    [newTag setNotes:noteSet];
+    
+    // Save the context.
+    NSError *error = nil;
+    if (![context save:&error]) {
+        // Replace this implementation with code to handle the error appropriately.
+        // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+        abort();
+    }
+    
+    //add to drawer
+    [_drawerView setTagArray:[self getTags]];
+}
+
+-(NSArray*)getTags{
+    
+    NSFetchRequest * req = [[NSFetchRequest alloc] initWithEntityName:@"Tag"];
     NSError * err;
     
     NSArray * tags = [_managedObjectContext executeFetchRequest:req error:&err];
     
-    if(!err){
-        [_drawerView setTagArray:tags];
-    }
+    if(!err)
+        return tags;
+    return nil;
 }
+
 
 // Returns the managed object context for the application.
 // If the context doesn't already exist, it is created and bound to the persistent store coordinator for the application.

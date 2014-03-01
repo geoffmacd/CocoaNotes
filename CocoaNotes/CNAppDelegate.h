@@ -8,8 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import "CNDrawerViewController.h"
+#import "CNMasterViewController.h"
+#import "JSSlidingViewController.h"
 
-@interface CNAppDelegate : UIResponder <UIApplicationDelegate>
+@interface CNAppDelegate : UIResponder <UIApplicationDelegate,DrawerDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
@@ -18,8 +20,12 @@
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
 @property CNDrawerViewController * drawerView;
+@property CNMasterViewController * masterView;
+@property JSSlidingViewController * slidingController;
 
 - (void)saveContext;
 - (NSURL *)applicationDocumentsDirectory;
+-(NSArray*)getTags;
+- (void)insertNewTag:(NSString*)tagName withInitialNote:(NSManagedObjectID*)firstNoteId;
 
 @end

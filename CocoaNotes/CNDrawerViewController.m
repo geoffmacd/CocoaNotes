@@ -7,7 +7,6 @@
 //
 
 #import "CNDrawerViewController.h"
-#import "Tag.h"
 
 @interface CNDrawerViewController ()
 
@@ -51,12 +50,12 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 5;//[_tagArray count];
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 1;
+    return [_tagArray count] + 1;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -66,18 +65,32 @@
     
     // Configure the cell...
     
-//    Tag * curTag = _tagArray[[indexPath row]];
-    
-    [cell.textLabel setText:@"Geoff"];
+    NSInteger index = [indexPath row];
+    if(index > 0){
+        index--;
+        Tag * curTag = [_tagArray objectAtIndex:index];
+        [cell.textLabel setText:curTag.name];
+    } else {
+        [cell.textLabel setText:@"Reset"];
+    }
     
     return cell;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     
-    //    Tag * curTag = _tagArray[[indexPath row]];
-    
-    [self.delegate selectedTag:nil];
+    NSInteger index = [indexPath row];
+    if(index > 0){
+        index--;
+        Tag * curTag = _tagArray[index];
+        
+        NSManagedObjectID * objId = [curTag objectID];
+        
+        
+        [self.delegate selectedTag:objId];
+    } else {
+        [self.delegate selectedTag:nil];
+    }
 }
 
 

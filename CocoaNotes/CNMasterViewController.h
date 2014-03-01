@@ -8,10 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import "CNDetailViewController.h"
+#import <CoreData/CoreData.h>
 
 @class CNDetailViewController;
 
-#import <CoreData/CoreData.h>
 
 @interface CNMasterViewController : UITableViewController <NSFetchedResultsControllerDelegate>
 
@@ -19,5 +19,7 @@
 
 @property (strong, nonatomic) NSFetchedResultsController *fetchedResultsController;
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+
+@property NSManagedObjectID * tagSort;
 
 @end

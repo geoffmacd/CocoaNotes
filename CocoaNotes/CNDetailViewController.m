@@ -8,6 +8,8 @@
 
 #import "CNDetailViewController.h"
 #import "CNSuggestionViewController.h"
+#import "CNAppDelegate.h"
+#import "Tag.h"
 
 @interface CNDetailViewController ()
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
@@ -18,24 +20,10 @@
 
 #pragma mark - Managing the detail item
 
-- (void)setDetailItem:(id)newDetailItem
+-(void)setNote:(Note *)note
 {
-    if (_detailItem != newDetailItem) {
-        _detailItem = newDetailItem;
-    } 
-
-    if (self.masterPopoverController != nil) {
-        [self.masterPopoverController dismissPopoverAnimated:YES];
-    }        
-}
-
--(void)detailViewComponents:(UIView*)view{
-    
-    NSLog(@"%@", [view description]);
-    
-    for(UIView * subView in [view subviews]){
-        
-        [self detailViewComponents:subView];
+    if (_note != note) {
+        _note = note;
     }
 }
 
@@ -47,13 +35,20 @@
     [self.view addSubview:_textView];
     
     // Update the user interface for the detail item.
-    if (self.detailItem) {
-        _textView.text = [[self.detailItem valueForKey:@"text"] description];
+    tagViews = [NSMutableArray new];
+    if (_note) {
+        _textView.text = _note.text;
+        
+        [_note.tags enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            //add tag view
+            Tag * tag = obj;
+            CNTagView * tagView = [[CNTagView alloc] initWithFrame:CGRectMake(0, 0, 45, kTagHeight) withName:tag.name];
+            [tagViews addObject:tagView];
+        }];
     }
     
     [_textView setParentControl:self];
     
-    tagViews = [NSMutableArray new];
     
     UICollectionViewFlowLayout * flow = [[UICollectionViewFlowLayout alloc] init];
     flow.scrollDirection = UICollectionViewScrollDirectionVertical;
@@ -93,8 +88,35 @@
 
 -(void)viewWillDisappear:(BOOL)animated{
     
-    [self.detailItem setValue:[_textView text] forKey:@"text"];
-    [self.context save:nil];
+    _note.text = _textView.text;
+    //save tags
+    CNAppDelegate * appDel = [[UIApplication sharedApplication] delegate];
+    NSArray * tags = [appDel getTags];
+    [tagViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+       
+        CNTagView * tagView = obj;
+        
+        __block BOOL found = NO;
+        [tags enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            
+            Tag * dbTag = obj;
+            if([dbTag.name isEqualToString:tagView.name]){
+                
+                //ensure the tag has a note attached
+                
+                found = YES;
+                *stop = YES;
+            }
+        }];
+        
+        if(!found && tagView.name){
+            //add new tag
+            [appDel insertNewTag:tagView.name withInitialNote:_note.objectID];
+        }
+    }];
+    
+    NSError * err;
+    [self.context save:&err];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
@@ -238,6 +260,7 @@
     rect.size.width = width;
     [cell setFrame:rect];
     
+    changing.name = changing.field.text;
     if([changing.name length]){
         //it is real, add another tag view
         if([tagViews count] <= 5){
