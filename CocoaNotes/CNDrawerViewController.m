@@ -68,7 +68,7 @@
         Tag * curTag = [_tagArray objectAtIndex:index];
         [cell.textLabel setText:curTag.name];
     } else {
-        NSAttributedString * attr  = [[NSAttributedString alloc] initWithString:@"Reset" attributes:@{NSForegroundColorAttributeName:[UIColor blueColor]}];
+        NSAttributedString * attr  = [[NSAttributedString alloc] initWithString:@"All" attributes:@{NSForegroundColorAttributeName:[UIColor purpleColor]}];
         [cell.textLabel setAttributedText:attr];
     }
     

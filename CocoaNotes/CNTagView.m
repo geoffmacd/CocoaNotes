@@ -27,11 +27,17 @@
         if(tagName)
             [self setName:tagName];
         else
-            [self setName:@"tag"];
+            [_field setPlaceholder:@"New Tag"];
         [_field setTextColor:[UIColor purpleColor]];
         [_field setDelegate:self];
         [_field setEnabled:YES];
         [self addSubview:_field];
+        
+        CGFloat width = [_field.text sizeWithAttributes:@{}].width + 10;
+        if(![_field.text length])
+            width = [_field.placeholder sizeWithAttributes:@{}].width + 40;
+        frame.size.width = width;
+        [self setFrame:frame];
         
     }
     return self;

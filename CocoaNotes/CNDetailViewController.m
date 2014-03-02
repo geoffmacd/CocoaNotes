@@ -52,8 +52,8 @@
     
     UICollectionViewFlowLayout * flow = [[UICollectionViewFlowLayout alloc] init];
     flow.scrollDirection = UICollectionViewScrollDirectionVertical;
-    flow.minimumInteritemSpacing = 25.0f;
-    _tagCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(2, 500, self.view.bounds.size.width-4, 40) collectionViewLayout:flow];
+    flow.minimumInteritemSpacing = 30.0f;
+    _tagCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(2, 520, self.view.bounds.size.width-4, 40) collectionViewLayout:flow];
     [_tagCollectionView setDelegate:self];
     [_tagCollectionView setDataSource:self];
     [_tagCollectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
@@ -103,31 +103,41 @@
 -(void)viewWillDisappear:(BOOL)animated{
     if(_note){
         _note.text = _textView.text;
-        //save tags
-        CNAppDelegate * appDel = (CNAppDelegate * )[[UIApplication sharedApplication] delegate];
-        NSArray * tags = [appDel getTags];
-        [tagViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-           
-            CNTagView * tagView = obj;
-            
-            __block BOOL found = NO;
-            [tags enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        if([_note.text length]){
+            //save tags
+            CNAppDelegate * appDel = (CNAppDelegate * )[[UIApplication sharedApplication] delegate];
+            NSArray * tags = [appDel getTags];
+            [tagViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+               
+                CNTagView * tagView = obj;
                 
-                Tag * dbTag = obj;
-                if([dbTag.name isEqualToString:tagView.name]){
+                if(tagView.name != nil){
+                
+                    __block BOOL found = NO;
+                    [tags enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                        
+                        Tag * dbTag = obj;
+                        if([dbTag.name isEqualToString:tagView.name]){
+                            
+                            //ensure the tag has a note attached
+                            
+                            found = YES;
+                            *stop = YES;
+                        }
+                    }];
                     
-                    //ensure the tag has a note attached
-                    
-                    found = YES;
-                    *stop = YES;
+                    if(!found && tagView.name){
+                        //add new tag
+                        [appDel insertNewTag:tagView.name withInitialNote:_note.objectID];
+                    }
                 }
             }];
+        } else {
             
-            if(!found && tagView.name){
-                //add new tag
-                [appDel insertNewTag:tagView.name withInitialNote:_note.objectID];
-            }
-        }];
+            //delete note
+            [_context deleteObject:_note];
+        }
         
         NSError * err;
         [self.context save:&err];
@@ -180,6 +190,8 @@
     CNTagView * tag = tagViews[[indexPath row]];
     
     CGFloat width = [tag.field.text sizeWithAttributes:@{}].width + 10;
+    if(![tag.field.text length])
+        width = [tag.field.placeholder sizeWithAttributes:@{}].width + 10;
     return CGSizeMake(width, kTagHeight);
 }
 
@@ -209,7 +221,7 @@
         
         //adjust tagviews
         CGRect rect = _tagCollectionView.frame;
-        rect.origin.y = 320;
+        rect.origin.y = 315;
         [_tagCollectionView setFrame:rect];
     } completion:nil];
 }
@@ -221,7 +233,7 @@
         
         //adjust tagviews
         CGRect rect = _tagCollectionView.frame;
-        rect.origin.y = 500;
+        rect.origin.y = 520;
         [_tagCollectionView setFrame:rect];
     } completion:nil];
 }

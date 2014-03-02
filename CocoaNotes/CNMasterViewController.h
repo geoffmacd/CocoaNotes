@@ -20,6 +20,6 @@
 @property (strong, nonatomic) NSFetchedResultsController *fetchedResultsController;
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
-@property NSManagedObjectID * tagSort;
+@property (nonatomic) NSManagedObjectID * tagSort;
 
 @end

@@ -84,7 +84,6 @@
     [programmaticSet formIntersectionWithCharacterSet:methodSet];
     _invalidCharSet = [programmaticSet invertedSet];
     
-
 }
 
 -(void)preferredContentSizeChanged{

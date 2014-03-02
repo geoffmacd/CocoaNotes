@@ -58,7 +58,7 @@
     [newNote setText:@""];
     
     if(_tagSort){
-        Tag * curTag = [context objectWithID:_tagSort];
+        Tag * curTag = (Tag *)[context objectWithID:_tagSort];
         [newNote addTagsObject:curTag];
         [curTag addNotesObject:newNote];
     }
@@ -215,7 +215,7 @@
 	    abort();
 	}
     
-    NSArray * obj = [self.fetchedResultsController fetchedObjects];
+//    NSArray * obj = [self.fetchedResultsController fetchedObjects];
     
     return _fetchedResultsController;
 }    
