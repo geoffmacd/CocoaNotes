@@ -32,6 +32,9 @@
     self.detailViewController = (CNDetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
+    
+    [self setTitle:@"Cococa Notes"];
+    [[UINavigationBar appearance] setTitleTextAttributes:@{NSTextEffectAttributeName:NSTextEffectLetterpressStyle,NSForegroundColorAttributeName:[UIColor purpleColor]}];
 }
 
 -(void)viewDidAppear:(BOOL)animated{
