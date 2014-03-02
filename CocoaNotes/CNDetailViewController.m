@@ -45,6 +45,10 @@
             CNTagView * tagView = [[CNTagView alloc] initWithFrame:CGRectMake(0, 0, 45, kTagHeight) withName:tag.name];
             [tagViews addObject:tagView];
         }];
+        
+        //add blank tag
+        CNTagView * blankTag = [[CNTagView alloc] initWithFrame:CGRectMake(0, 0, 45, kTagHeight) withName:nil];
+        [tagViews addObject:blankTag];
     }
     
     [_textView setParentControl:self];
@@ -68,18 +72,21 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tagViewEditing:) name:kTagViewTextEditing object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tagViewEndEditing:) name:kTagViewEndedTextEditing object:nil];
 
-    if(![tagViews count]){
-        CNTagView * blankTag = [[CNTagView alloc] initWithFrame:CGRectMake(0, 0, 45, kTagHeight) withName:nil];
-        [tagViews addObject:blankTag];
-    }
-    
     [self.view addSubview:_tagCollectionView];
     
     //add cursor movement gestures
     self.cursorMovement = [[JTSCursorMovement alloc] initWithTextView:_textView];
     
+    //hack right swipe for JTS cursor to autocomplete
+    [self.cursorMovement.rightSwipeRecognizer addTarget:self action:@selector(rightSwipe:)];
+    
     UIBarButtonItem * del = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(deleteNote)];
     [self.navigationItem setRightBarButtonItem:del];
+}
+
+-(void)rightSwipe:(UISwipeGestureRecognizer*)swipe{
+    
+    [_textView handleSwipeRight];
 }
 
 -(void)deleteNote{
@@ -121,6 +128,9 @@
                         if([dbTag.name isEqualToString:tagView.name]){
                             
                             //ensure the tag has a note attached
+                            if([dbTag.notes indexOfObject:_note] == NSNotFound){
+                                [dbTag addNotesObject:_note];
+                            }
                             
                             found = YES;
                             *stop = YES;
@@ -273,8 +283,8 @@
     
     changing.name = changing.field.text;
     if([changing.name length]){
-        //it is real, add another tag view
-        if([tagViews count] <= 5){
+        //it is real, add another tag view until 4
+        if([tagViews count] <= 3){
             CNTagView * blankTag = [[CNTagView alloc] initWithFrame:CGRectMake(0, 0, 45, kTagHeight) withName:nil];
             [tagViews addObject:blankTag];
         }

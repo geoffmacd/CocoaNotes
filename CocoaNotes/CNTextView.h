@@ -37,4 +37,6 @@
 @property CNSuggestionViewController * suggestionBox;
 @property (weak) id<CNTextViewDelegate> parentControl;
 
+-(void)handleSwipeRight;
+
 @end

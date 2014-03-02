@@ -15,4 +15,10 @@
 @dynamic name;
 @dynamic notes;
 
+- (void)addNotesObject:(Note *)value {
+    NSMutableOrderedSet* tempSet = [NSMutableOrderedSet orderedSetWithOrderedSet:self.notes];
+    [tempSet addObject:value];
+    self.notes = tempSet;
+}
+
 @end

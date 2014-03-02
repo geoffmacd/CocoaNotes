@@ -22,7 +22,6 @@
         _field.enablesReturnKeyAutomatically = YES;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         _field.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-//        _field.clearButtonMode = UITextFieldViewModeWhileEditing;
         [_field setBackgroundColor:[UIColor groupTableViewBackgroundColor]];
         if(tagName)
             [self setName:tagName];
@@ -33,7 +32,7 @@
         [_field setEnabled:YES];
         [self addSubview:_field];
         
-        CGFloat width = [_field.text sizeWithAttributes:@{}].width + 10;
+        CGFloat width = [_field.text sizeWithAttributes:@{}].width + 40;
         if(![_field.text length])
             width = [_field.placeholder sizeWithAttributes:@{}].width + 40;
         frame.size.width = width;

@@ -218,6 +218,19 @@
     self.text = [NSString stringWithString:allText];
 }
 
+-(void)handleSwipeRight{
+    
+    if(showingBox){
+        //autocomplete with first suggestions
+        NSString * key = [_suggestionBox.order firstObject];
+        NSArray * array = _suggestionBox.dict[key];
+        
+        [self replaceWordInTextView:[array firstObject]];
+        
+        [self removeListView];
+    }
+}
+
 /**
  Finds most recent word behind location from allText
  @param allText text in UITextView
@@ -260,6 +273,13 @@
 
 #pragma mark
 #pragma mark UITextViewDelegate
+
+-(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
+    
+    if(showingBox && [text length] > 1)
+        return NO;
+    return YES;
+}
 
 -(void)textViewDidChange:(UITextView *)textView{
     

@@ -41,6 +41,10 @@
     _tagArray = tagArray;
     
     [self.tableView reloadData];
+    
+    [self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]
+                                animated:NO
+                          scrollPosition:UITableViewScrollPositionTop];
 }
 
 #pragma mark - Table view data source

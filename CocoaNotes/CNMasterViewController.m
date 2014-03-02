@@ -59,7 +59,7 @@
     
     if(_tagSort){
         Tag * curTag = (Tag *)[context objectWithID:_tagSort];
-        [newNote addTagsObject:curTag];
+        [newNote setTags:[[NSOrderedSet alloc] initWithArray:@[curTag]]];
         [curTag addNotesObject:newNote];
     }
     

@@ -15,4 +15,10 @@
 @dynamic text;
 @dynamic tags;
 
+- (void)addTagsObject:(Note *)value {
+    NSMutableOrderedSet* tempSet = [NSMutableOrderedSet orderedSetWithOrderedSet:self.tags];
+    [tempSet addObject:value];
+    self.tags = tempSet;
+}
+
 @end
