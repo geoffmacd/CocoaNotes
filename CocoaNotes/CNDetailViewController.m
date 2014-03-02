@@ -53,7 +53,7 @@
     UICollectionViewFlowLayout * flow = [[UICollectionViewFlowLayout alloc] init];
     flow.scrollDirection = UICollectionViewScrollDirectionVertical;
     flow.minimumInteritemSpacing = 25.0f;
-    _tagCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 500, self.view.bounds.size.width, 40) collectionViewLayout:flow];
+    _tagCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(2, 500, self.view.bounds.size.width-4, 40) collectionViewLayout:flow];
     [_tagCollectionView setDelegate:self];
     [_tagCollectionView setDataSource:self];
     [_tagCollectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
@@ -77,6 +77,20 @@
     
     //add cursor movement gestures
     self.cursorMovement = [[JTSCursorMovement alloc] initWithTextView:_textView];
+    
+    UIBarButtonItem * del = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(deleteNote)];
+    [self.navigationItem setRightBarButtonItem:del];
+}
+
+-(void)deleteNote{
+    
+    [_context deleteObject:_note];
+    NSError * err;
+    [self.context save:&err];
+    
+    _note = nil;
+    
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)viewDidLoad
@@ -87,36 +101,37 @@
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
-    
-    _note.text = _textView.text;
-    //save tags
-    CNAppDelegate * appDel = [[UIApplication sharedApplication] delegate];
-    NSArray * tags = [appDel getTags];
-    [tagViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-       
-        CNTagView * tagView = obj;
-        
-        __block BOOL found = NO;
-        [tags enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    if(_note){
+        _note.text = _textView.text;
+        //save tags
+        CNAppDelegate * appDel = (CNAppDelegate * )[[UIApplication sharedApplication] delegate];
+        NSArray * tags = [appDel getTags];
+        [tagViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+           
+            CNTagView * tagView = obj;
             
-            Tag * dbTag = obj;
-            if([dbTag.name isEqualToString:tagView.name]){
+            __block BOOL found = NO;
+            [tags enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
                 
-                //ensure the tag has a note attached
-                
-                found = YES;
-                *stop = YES;
+                Tag * dbTag = obj;
+                if([dbTag.name isEqualToString:tagView.name]){
+                    
+                    //ensure the tag has a note attached
+                    
+                    found = YES;
+                    *stop = YES;
+                }
+            }];
+            
+            if(!found && tagView.name){
+                //add new tag
+                [appDel insertNewTag:tagView.name withInitialNote:_note.objectID];
             }
         }];
         
-        if(!found && tagView.name){
-            //add new tag
-            [appDel insertNewTag:tagView.name withInitialNote:_note.objectID];
-        }
-    }];
-    
-    NSError * err;
-    [self.context save:&err];
+        NSError * err;
+        [self.context save:&err];
+    }
     
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
@@ -132,22 +147,6 @@
     // Dispose of any resources that can be recreated.
 }
 
-
-#pragma mark - Split view
-
-- (void)splitViewController:(UISplitViewController *)splitController willHideViewController:(UIViewController *)viewController withBarButtonItem:(UIBarButtonItem *)barButtonItem forPopoverController:(UIPopoverController *)popoverController
-{
-    barButtonItem.title = NSLocalizedString(@"Master", @"Master");
-    [self.navigationItem setLeftBarButtonItem:barButtonItem animated:YES];
-    self.masterPopoverController = popoverController;
-}
-
-- (void)splitViewController:(UISplitViewController *)splitController willShowViewController:(UIViewController *)viewController invalidatingBarButtonItem:(UIBarButtonItem *)barButtonItem
-{
-    // Called when the view is shown again in the split view, invalidating the button and popover controller.
-    [self.navigationItem setLeftBarButtonItem:nil animated:YES];
-    self.masterPopoverController = nil;
-}
 
 #pragma mark - CNTextViewDelegate
 

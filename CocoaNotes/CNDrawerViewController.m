@@ -7,10 +7,7 @@
 //
 
 #import "CNDrawerViewController.h"
-
-@interface CNDrawerViewController ()
-
-@end
+#import "Tag.h"
 
 @implementation CNDrawerViewController
 
@@ -21,7 +18,7 @@
         // Custom initialization
         [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
         [self.tableView setContentInset:UIEdgeInsetsMake(40, 0, 0, 0)];
-        
+        self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     }
     return self;
 }
@@ -71,7 +68,8 @@
         Tag * curTag = [_tagArray objectAtIndex:index];
         [cell.textLabel setText:curTag.name];
     } else {
-        [cell.textLabel setText:@"Reset"];
+        NSAttributedString * attr  = [[NSAttributedString alloc] initWithString:@"Reset" attributes:@{NSForegroundColorAttributeName:[UIColor blueColor]}];
+        [cell.textLabel setAttributedText:attr];
     }
     
     return cell;

@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "Tag.h"
 
 @protocol DrawerDelegate <NSObject>
 

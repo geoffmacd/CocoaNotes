@@ -13,7 +13,7 @@
 
 #define kSuggestorHeight        120
 #define kTagOffset              40
-#define kTagHeight              30
+#define kTagHeight              35
 
 
 @protocol CNTextViewDelegate <NSObject>

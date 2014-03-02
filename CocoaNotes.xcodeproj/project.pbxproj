@@ -11,7 +11,6 @@
 		24B19D4518C17FD90028B185 /* frontViewControllerDropShadow.png in Resources */ = {isa = PBXBuildFile; fileRef = 24B19D1318C17FD60028B185 /* frontViewControllerDropShadow.png */; };
 		24B19D4618C17FD90028B185 /* frontViewControllerDropShadow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 24B19D1418C17FD60028B185 /* frontViewControllerDropShadow@2x.png */; };
 		24B19D4718C17FD90028B185 /* JSSlidingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 24B19D1618C17FD60028B185 /* JSSlidingViewController.m */; };
-		24B19D6718C17FD90028B185 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 24B19D4418C17FD90028B185 /* README.md */; };
 		24B19D6D18C180BD0028B185 /* CNDrawerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 24B19D6C18C180BD0028B185 /* CNDrawerViewController.m */; };
 		24D2DCC718B07AA7000E73DD /* CocoaClassesCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = 24D2DCC618B07AA7000E73DD /* CocoaClassesCheck.m */; };
 		24D2DCCD18B1CC9A000E73DD /* CNSuggestionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 24D2DCCC18B1CC9A000E73DD /* CNSuggestionViewController.m */; };
@@ -59,7 +58,6 @@
 		24B19D1418C17FD60028B185 /* frontViewControllerDropShadow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "frontViewControllerDropShadow@2x.png"; sourceTree = "<group>"; };
 		24B19D1518C17FD60028B185 /* JSSlidingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSSlidingViewController.h; sourceTree = "<group>"; };
 		24B19D1618C17FD60028B185 /* JSSlidingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSSlidingViewController.m; sourceTree = "<group>"; };
-		24B19D4418C17FD90028B185 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		24B19D6B18C180BD0028B185 /* CNDrawerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNDrawerViewController.h; sourceTree = "<group>"; };
 		24B19D6C18C180BD0028B185 /* CNDrawerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNDrawerViewController.m; sourceTree = "<group>"; };
 		24D2DCC518B07AA7000E73DD /* CocoaClassesCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CocoaClassesCheck.h; sourceTree = "<group>"; };
@@ -137,7 +135,6 @@
 			isa = PBXGroup;
 			children = (
 				24B19D1218C17FD60028B185 /* JSSlidingViewController */,
-				24B19D4418C17FD90028B185 /* README.md */,
 			);
 			path = JSSlidingViewController;
 			sourceTree = "<group>";
@@ -370,7 +367,6 @@
 				C3EEDB4B18AD5E30003CC23D /* Images.xcassets in Resources */,
 				C3EEDB6918AD5E7B003CC23D /* podfile in Resources */,
 				24B19D4618C17FD90028B185 /* frontViewControllerDropShadow@2x.png in Resources */,
-				24B19D6718C17FD90028B185 /* README.md in Resources */,
 				C3EEDB3418AD5E30003CC23D /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
