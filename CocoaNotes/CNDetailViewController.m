@@ -151,6 +151,10 @@
         
         NSError * err;
         [self.context save:&err];
+        
+        
+        CNAppDelegate * appDel = (CNAppDelegate * )[[UIApplication sharedApplication] delegate];
+        [appDel.drawerView setTagArray:[appDel getTags]];
     }
     
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];

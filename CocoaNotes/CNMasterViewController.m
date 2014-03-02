@@ -24,8 +24,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
-//    self.navigationItem.leftBarButtonItem = self.editButtonItem;
 
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(newNote)];
     self.navigationItem.rightBarButtonItem = addButton;
@@ -47,6 +45,12 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)pressedTag{
+    
+    CNAppDelegate * appDel = (CNAppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDel.slidingController openSlider:YES completion:nil];
 }
 
 -(void)newNote{
@@ -92,6 +96,13 @@
     //update fetch results for tag
     [NSFetchedResultsController deleteCacheWithName:@"Master"];
     _fetchedResultsController = nil;
+    
+    UIBarButtonItem *tagTitle = [[UIBarButtonItem alloc] initWithTitle:@"All" style:UIBarButtonItemStylePlain target:self action:@selector(pressedTag)];
+    if(tagSort){
+        Tag * curTag = (Tag *)[_managedObjectContext objectWithID:_tagSort];
+        tagTitle.title = curTag.name;
+    }
+    self.navigationItem.leftBarButtonItem = tagTitle;
     
     [self.tableView reloadData];
 }
